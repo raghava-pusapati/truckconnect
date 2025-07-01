@@ -681,233 +681,233 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
     );
   }
 
-  return (
-    <div className="min-h-screen bg-amber-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-amber-800">Customer Dashboard</h1>
-          
-        </div>
-
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+    return (
+      <div className="min-h-screen bg-amber-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-amber-800">Customer Dashboard</h1>
+            
           </div>
-        )}
 
-        {/* Tabs */}
-        <div className="flex space-x-4 mb-6">
-          <button
-            onClick={() => setActiveTab('post')}
-            className={`flex items-center px-4 py-2 rounded-lg ${
-              activeTab === 'post'
-                ? 'bg-amber-600 text-white'
-                : 'bg-white text-amber-800'
-            }`}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Post a Load
-          </button>
-          <button
-            onClick={() => setActiveTab('view')}
-            className={`flex items-center px-4 py-2 rounded-lg ${
-              activeTab === 'view'
-                ? 'bg-amber-600 text-white'
-                : 'bg-white text-amber-800'
-            }`}
-          >
-            <ClipboardList className="w-5 h-5 mr-2" />
-            View My Loads
-          </button>
-          <button
-            onClick={() => setActiveTab('completed')}
-            className={`flex items-center px-4 py-2 rounded-lg ${
-              activeTab === 'completed'
-                ? 'bg-amber-600 text-white'
-                : 'bg-white text-amber-800'
-            }`}
-          >
-            <ClipboardCheck className="w-5 h-5 mr-2" />
-            Completed Loads
-          </button>
-        </div>
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
 
-        {isLoading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          {/* Tabs */}
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setActiveTab('post')}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                activeTab === 'post'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-white text-amber-800'
+              }`}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Post a Load
+            </button>
+            <button
+              onClick={() => setActiveTab('view')}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                activeTab === 'view'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-white text-amber-800'
+              }`}
+            >
+              <ClipboardList className="w-5 h-5 mr-2" />
+              View My Loads
+            </button>
+            <button
+              onClick={() => setActiveTab('completed')}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                activeTab === 'completed'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-white text-amber-800'
+              }`}
+            >
+              <ClipboardCheck className="w-5 h-5 mr-2" />
+              Completed Loads
+            </button>
           </div>
-        )}
 
-        {/* Post a Load Form */}
-        {!isLoading && activeTab === 'post' && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold text-amber-800 mb-4">Post New Load</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Source <span className='text-green-500'>(Start Point -Along with Exact Address)</span></label>
-                <input
-                  type="text"
-                  name="source"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Destination <span className='text-green-500'>(End Point -Along with Exact Address)</span></label>
-                <input
-                  type="text"
-                  name="destination"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Load Type & Description about load</label>
-                <input
-                  type="text"
-                  name="loadType"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Quantity (enter only in tons)</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  required
-                  min="1"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Estimated Fare (₹)</label>
-                <input
-                  type="number"
-                  name="estimatedFare"
-                  required
-                  min="0"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
-              >
-                {isLoading ? 'Posting...' : 'Post Load'}
-              </button>
-            </form>
-          </div>
-        )}
+          {isLoading && (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+            </div>
+          )}
 
-        {/* View My Loads */}
-        {!isLoading && activeTab === 'view' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getPendingLoads().map((load) => (
-              <div key={load.id} className={`bg-white p-6 rounded-lg shadow-md relative ${
-                load.status === 'assigned' ? 'border-l-4 border-green-500' : ''
-              }`}>
-                {/* Only show delete button for pending loads, not for assigned loads */}
-                {load.status === 'pending' && (
-                  <button
-                    onClick={() => handleDeleteLoad(load.id)}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
-                    title="Cancel Load"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                )}
-                
-                <h3 className="text-xl font-semibold text-amber-800 mb-4 pr-8">
-                  {load.source} → {load.destination}
-                </h3>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
-                  <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
-                  <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
-                  <p>
-                    <span className="font-medium">Status:</span>{' '}
-                    <span className={`${
-                      load.status === 'pending' 
-                        ? 'text-orange-600' 
-                        : load.status === 'assigned' 
-                          ? 'text-green-600' 
-                          : 'text-blue-600'
-                    } font-medium`}>
-                      {load.status === 'pending' 
-                        ? 'Pending' 
-                        : load.status === 'assigned' 
-                          ? 'Assigned' 
-                          : 'Completed'}
-                    </span>
-                  </p>
-                  {load.status === 'assigned' && load.assignedDriver && (
-                    <div className="mt-2 p-3 bg-amber-50 rounded-md">
-                      <p className="font-medium text-amber-800">Assigned Driver</p>
-                      <p className="text-sm"><span className="font-medium">Name:</span> {load.assignedDriver.name}</p>
-                      <p className="text-sm"><span className="font-medium">Phone:</span> {load.assignedDriver.mobile}</p>
-                      <p className="text-sm"><span className="font-medium">Lorry Type:</span> {load.assignedDriver.lorryType}</p>
-                      <p className="text-sm"><span className="font-medium">Capacity:</span> {load.assignedDriver.maxCapacity} tons</p>
-                    </div>
-                  )}
+          {/* Post a Load Form */}
+          {!isLoading && activeTab === 'post' && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold text-amber-800 mb-4">Post New Load</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Source <span className='text-green-500'>(Start Point -Along with Exact Address)</span></label>
+                  <input
+                    type="text"
+                    name="source"
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
                 </div>
-                <div className="mt-4 flex flex-col space-y-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Destination <span className='text-green-500'>(End Point -Along with Exact Address)</span></label>
+                  <input
+                    type="text"
+                    name="destination"
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Load Type & Description about load</label>
+                  <input
+                    type="text"
+                    name="loadType"
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Quantity (enter only in tons)</label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    required
+                    min="1"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Estimated Fare (₹)</label>
+                  <input
+                    type="number"
+                    name="estimatedFare"
+                    required
+                    min="0"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
+                >
+                  {isLoading ? 'Posting...' : 'Post Load'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* View My Loads */}
+          {!isLoading && activeTab === 'view' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {getPendingLoads().map((load) => (
+                <div key={load.id} className={`bg-white p-6 rounded-lg shadow-md relative ${
+                  load.status === 'assigned' ? 'border-l-4 border-green-500' : ''
+                }`}>
+                  {/* Only show delete button for pending loads, not for assigned loads */}
                   {load.status === 'pending' && (
                     <button
-                      onClick={() => toggleApplicants(load.id)}
-                      className="w-full bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 flex justify-center items-center"
+                      onClick={() => handleDeleteLoad(load.id)}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+                      title="Cancel Load"
                     >
-                      {load.showApplicants ? (
-                        <>
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Hide Driver Applicants
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          View Driver Applicants
-                        </>
-                      )}
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   )}
-                  {load.status === 'assigned' && (
-                <button
-                  onClick={() => handleCompleteLoad(load.id)}
-                      className="w-full bg-amber-600 text-white py-2 rounded-md hover:bg-amber-700 flex justify-center items-center"
-                >
-                      Mark as Completed
-                </button>
-                  )}
+                  
+                  <h3 className="text-xl font-semibold text-amber-800 mb-4 pr-8">
+                    {load.source} → {load.destination}
+                  </h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
+                    <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
+                    <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
+                    <p>
+                      <span className="font-medium">Status:</span>{' '}
+                      <span className={`${
+                        load.status === 'pending' 
+                          ? 'text-orange-600' 
+                          : load.status === 'assigned' 
+                            ? 'text-green-600' 
+                            : 'text-blue-600'
+                      } font-medium`}>
+                        {load.status === 'pending' 
+                          ? 'Pending' 
+                          : load.status === 'assigned' 
+                            ? 'Assigned' 
+                            : 'Completed'}
+                      </span>
+                    </p>
+                    {load.status === 'assigned' && load.assignedDriver && (
+                      <div className="mt-2 p-3 bg-amber-50 rounded-md">
+                        <p className="font-medium text-amber-800">Assigned Driver</p>
+                        <p className="text-sm"><span className="font-medium">Name:</span> {load.assignedDriver.name}</p>
+                        <p className="text-sm"><span className="font-medium">Phone:</span> {load.assignedDriver.mobile}</p>
+                        <p className="text-sm"><span className="font-medium">Lorry Type:</span> {load.assignedDriver.lorryType}</p>
+                        <p className="text-sm"><span className="font-medium">Capacity:</span> {load.assignedDriver.maxCapacity} tons</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 flex flex-col space-y-2">
+                    {load.status === 'pending' && (
+                      <button
+                        onClick={() => toggleApplicants(load.id)}
+                        className="w-full bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 flex justify-center items-center"
+                      >
+                        {load.showApplicants ? (
+                          <>
+                            <ChevronUp className="w-4 h-4 mr-2" />
+                            Hide Driver Applicants
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4 mr-2" />
+                            View Driver Applicants
+                          </>
+                        )}
+                      </button>
+                    )}
+                    {load.status === 'assigned' && (
+                  <button
+                    onClick={() => handleCompleteLoad(load.id)}
+                        className="w-full bg-amber-600 text-white py-2 rounded-md hover:bg-amber-700 flex justify-center items-center"
+                  >
+                        Mark as Completed
+                  </button>
+                    )}
+                  </div>
+                  {load.status === 'pending' && renderApplicants(load)}
                 </div>
-                {load.status === 'pending' && renderApplicants(load)}
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* Completed Loads */}
-        {!isLoading && activeTab === 'completed' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getCompletedLoads().map((load) => (
-              <div key={load.id} className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-amber-800 mb-4">
-                  {load.source} → {load.destination}
-                </h3>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
-                  <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
-                  <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
-                  <p><span className="font-medium">Status:</span> {load.status}</p>
-                  <p><span className="font-medium">Completed At:</span> {new Date(load.completedAt || '').toLocaleString()}</p>
+          {/* Completed Loads */}
+          {!isLoading && activeTab === 'completed' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {getCompletedLoads().map((load) => (
+                <div key={load.id} className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-xl font-semibold text-amber-800 mb-4">
+                    {load.source} → {load.destination}
+                  </h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
+                    <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
+                    <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
+                    <p><span className="font-medium">Status:</span> {load.status}</p>
+                    <p><span className="font-medium">Completed At:</span> {new Date(load.completedAt || '').toLocaleString()}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default CustomerDashboard;
+  export default CustomerDashboard;

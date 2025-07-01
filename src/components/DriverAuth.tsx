@@ -176,6 +176,7 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
 
     // Validate password
     const passwordValidation = validatePassword(formData.password);
+    // since everyone has different password requirements, we can use a function to validate the password
     if (!passwordValidation.isValid) {
       setError(passwordValidation.message);
       return;
