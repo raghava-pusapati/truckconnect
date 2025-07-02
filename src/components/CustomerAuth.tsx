@@ -79,7 +79,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
     try {
       if (isLogin) {
         // Login API call
-        const response = await axios.post('http://localhost:5000/api/auth/login', {
+        const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/login', {
           email: formData.email,
           password: formData.password
         });
@@ -99,7 +99,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
         }
       } else {
         // Registration API call
-        const response = await axios.post('http://localhost:5000/api/auth/register', {
+        const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/register', {
           name: formData.name,
           email: formData.email,
           password: formData.password,

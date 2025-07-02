@@ -178,7 +178,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
 
       // Also fetch loads the driver has applied for but not yet been assigned
       try {
-        const appliedResponse = await fetch('http://localhost:5000/api/loads/applications', {
+        const appliedResponse = await fetch('https://truckconnect-backend.onrender.com/api/loads/applications', {
           headers: {
             'x-auth-token': localStorage.getItem('token') || ''
           }

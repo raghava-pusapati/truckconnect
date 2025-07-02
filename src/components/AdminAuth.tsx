@@ -25,7 +25,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
     
     try {
       // Login API call
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/login', {
         email: formData.email,
         password: formData.password
       });

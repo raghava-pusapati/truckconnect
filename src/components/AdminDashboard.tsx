@@ -169,7 +169,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
     // Helper function to get document URL
     const getDocumentUrl = (driverId: string, documentType: string): string => {
       // Base URL for document storage
-      const baseUrl = 'http://localhost:5000/uploads/drivers';
+      const baseUrl = 'https://truckconnect-backend.onrender.com/uploads/drivers';
       
       // Map document types to file extensions
       const extensions: Record<string, string> = {
