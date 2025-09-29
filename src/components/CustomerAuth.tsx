@@ -138,26 +138,26 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="mb-6">
           <button
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
+            className="inline-flex items-center text-amber-800 hover:text-amber-900 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </button>
         </div>
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className="bg-white/80 backdrop-blur rounded-2xl shadow-2xl border border-amber-100 p-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            <h2 className="text-3xl font-extrabold text-amber-950 mb-8 tracking-tight">
               {isLogin ? 'Customer Login' : 'Customer Registration'}
             </h2>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
               {error}
             </div>
           )}
@@ -165,11 +165,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <label className="block text-sm font-medium text-amber-900">Name</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
@@ -177,11 +177,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-amber-900">Email</label>
               <input
                 type="email"
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -189,11 +189,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mobile Number</label>
+                <label className="block text-sm font-medium text-amber-900">Mobile Number</label>
                 <input
                   type="tel"
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                 />
@@ -201,11 +201,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block text-sm font-medium text-amber-900">Password</label>
               <input
                 type="password"
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
@@ -215,11 +215,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600/90 hover:to-amber-600/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-60"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white mr-2"></div>
                     {isLogin ? 'Logging in...' : 'Registering...'}
                   </div>
                 ) : (
@@ -241,7 +241,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
                   password: ''
                 });
               }}
-              className="text-sm text-orange-600 hover:text-orange-500"
+              className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
             >
               {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
             </button>

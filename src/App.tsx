@@ -31,7 +31,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
-      <nav className="bg-amber-50 shadow-lg">
+      <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-amber-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <div 
@@ -43,14 +43,14 @@ function App() {
               }}
             >
               <Truck className="h-8 w-8 text-amber-950" />
-              <span className="ml-2 text-2xl font-bold text-amber-950">Truck Connect</span>
+              <span className="ml-2 text-2xl font-extrabold tracking-tight text-amber-950">Truck Connect</span>
             </div>
             {currentUser && (
               <div className="flex items-center">
-                <span className="mr-4">Welcome, {currentUser.name}</span>
+                <span className="mr-4 text-amber-900">Welcome, {currentUser.name}</span>
                 <button
                   onClick={handleLogout}
-                  className="bg-amber-950 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors"
+                  className="bg-amber-950 text-white px-4 py-2 rounded-xl shadow hover:bg-orange-700 transition-colors"
                 >
                   Logout
                 </button>
