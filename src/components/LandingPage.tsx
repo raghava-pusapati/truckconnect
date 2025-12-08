@@ -47,7 +47,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRoleSelect }) => {
               <Users className="h-7 w-7" />
             </div>
             <h2 className="text-2xl font-semibold mb-2 text-amber-950">Customer</h2>
-            <p className="text-amber-900/80">Post your loads and find reliable drivers for your transportation needs</p>
+            <p className="text-amber-900/80">Post your loads and find reliable drivers for your transportation needs in one click</p>
             <div className="mt-6 text-orange-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Get started →</div>
           </div>
 
