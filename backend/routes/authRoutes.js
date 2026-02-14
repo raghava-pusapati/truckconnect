@@ -183,11 +183,21 @@ router.post('/driver/register', upload.fields([
       maxCapacity
     } = req.body;
 
-    console.log(`Driver registration attempt for: ${email}`);
+    console.log('Driver registration attempt');
+    console.log('Received data:', { name, email, phone, address, lorryType, maxCapacity, hasPassword: !!password });
+    console.log('Received files:', req.files ? Object.keys(req.files) : 'No files');
 
     // Validate required fields
     if (!name || !email || !password || !phone || !address || !lorryType || !maxCapacity) {
-      console.log('Missing required fields');
+      console.log('Missing required fields:', {
+        name: !!name,
+        email: !!email,
+        password: !!password,
+        phone: !!phone,
+        address: !!address,
+        lorryType: !!lorryType,
+        maxCapacity: !!maxCapacity
+      });
       return res.status(400).json({ msg: 'Please fill all required fields' });
     }
 

@@ -7,9 +7,6 @@ const API_BASE_URL = 'https://truckconnect-backend.onrender.com/api';
 // Configure axios with base URL
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Add request interceptor for authentication
@@ -18,6 +15,10 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Only set Content-Type to JSON if it's not already set (e.g., for FormData)
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
     }
     return config;
   },
@@ -40,14 +41,11 @@ export const authAPI = {
     return response.data;
   },
   driverRegister: async (formData: FormData) => {
-    // Set a longer timeout for document uploads
+    // Axios automatically sets the correct Content-Type for FormData
     const response = await api.post('/auth/driver/register', formData, {
       timeout: 60000, // 60 seconds timeout for large uploads
-      maxContentLength: Infinity, // Don't limit size in axios (server will validate)
-      maxBodyLength: Infinity, // Don't limit size in axios (server will validate)
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
     return response.data;
   }
