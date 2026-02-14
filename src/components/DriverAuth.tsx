@@ -217,6 +217,25 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
           if (documents.medical) formDataToSend.append('medical', documents.medical);
           if (documents.allIndiaPermit) formDataToSend.append('allIndiaPermit', documents.allIndiaPermit);
           
+          // Debug: Log what we're sending
+          console.log('FormData contents:');
+          console.log('Text fields:', {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.mobile,
+            address: formData.address,
+            lorryType: formData.lorryType,
+            maxCapacity: formData.maxCapacity
+          });
+          console.log('Files:', {
+            license: documents.license?.name,
+            rc: documents.rc?.name,
+            fitness: documents.fitness?.name,
+            insurance: documents.insurance?.name,
+            medical: documents.medical?.name,
+            allIndiaPermit: documents.allIndiaPermit?.name
+          });
+          
           console.log('Sending registration request...');
           
           // Use authAPI to register the driver with FormData

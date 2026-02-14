@@ -41,12 +41,20 @@ export const authAPI = {
     return response.data;
   },
   driverRegister: async (formData: FormData) => {
-    // Axios automatically sets the correct Content-Type for FormData
-    const response = await api.post('/auth/driver/register', formData, {
-      timeout: 60000, // 60 seconds timeout for large uploads
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
+    // For FormData, we need to let the browser set Content-Type with boundary
+    // So we create a custom config without Content-Type
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/driver/register`, 
+      formData,
+      {
+        timeout: 60000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        headers: {
+          // Don't set Content-Type - let browser set it with boundary
+        }
+      }
+    );
     return response.data;
   }
 };
