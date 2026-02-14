@@ -3,7 +3,6 @@ import { ArrowLeft, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 import { authAPI } from '../api';
-import imageCompression from 'browser-image-compression';
 import axios from 'axios';
 
 interface DriverAuthProps {
@@ -112,51 +111,6 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
     }
   };
 
-  // Function to compress image file
-  const compressImage = async (file: File): Promise<File> => {
-    // Skip compression for PDFs and small images
-    if (file.type === 'application/pdf' || file.size < 500 * 1024) {
-      return file;
-    }
-
-    try {
-      // Compression options
-      const options = {
-        maxSizeMB: 1, // Max size in MB
-        maxWidthOrHeight: 1920, // Max width/height in pixels
-        useWebWorker: true,
-        fileType: file.type
-      };
-
-      console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
-      const compressedFile = await imageCompression(file, options);
-      console.log(`Compressed to ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-      
-      return compressedFile;
-    } catch (error) {
-      console.error('Error compressing image:', error);
-      return file; // Return original file if compression fails
-    }
-  };
-
-  // Function to convert File to base64
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          // Some browsers add metadata to the result, make sure we're only getting the data part
-          const base64String = reader.result;
-          resolve(base64String);
-        } else {
-          reject(new Error('Failed to convert file to base64'));
-        }
-      };
-      reader.onerror = error => reject(error);
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -240,48 +194,33 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
 
         // Show loading message
         setIsLoading(true);
-        console.log('Processing documents...');
+        console.log('Uploading documents to Cloudinary...');
         
         try {
-          // Process the documents into base64 strings
-          // First compress the images to reduce their size
-          const compressedDocuments = {
-            license: documents.license ? await compressImage(documents.license) : null,
-            rc: documents.rc ? await compressImage(documents.rc) : null,
-            fitness: documents.fitness ? await compressImage(documents.fitness) : null,
-            insurance: documents.insurance ? await compressImage(documents.insurance) : null,
-            medical: documents.medical ? await compressImage(documents.medical) : null,
-            allIndiaPermit: documents.allIndiaPermit ? await compressImage(documents.allIndiaPermit) : null
-          };
-
-          // Convert compressed documents to base64
-          const documentBase64 = {
-            license: compressedDocuments.license ? await fileToBase64(compressedDocuments.license) : null,
-            rc: compressedDocuments.rc ? await fileToBase64(compressedDocuments.rc) : null,
-            fitness: compressedDocuments.fitness ? await fileToBase64(compressedDocuments.fitness) : null,
-            insurance: compressedDocuments.insurance ? await fileToBase64(compressedDocuments.insurance) : null,
-            medical: compressedDocuments.medical ? await fileToBase64(compressedDocuments.medical) : null,
-            allIndiaPermit: compressedDocuments.allIndiaPermit ? await fileToBase64(compressedDocuments.allIndiaPermit) : null
-          };
+          // Create FormData object for multipart/form-data upload
+          const formDataToSend = new FormData();
           
-          console.log('Documents processed successfully');
+          // Append text fields
+          formDataToSend.append('name', formData.name);
+          formDataToSend.append('email', formData.email);
+          formDataToSend.append('password', formData.password);
+          formDataToSend.append('phone', formData.mobile);
+          formDataToSend.append('address', formData.address);
+          formDataToSend.append('lorryType', formData.lorryType);
+          formDataToSend.append('maxCapacity', formData.maxCapacity);
           
-          // Create driver data object with base64 documents
-          const driverData = {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            phone: formData.mobile,
-            address: formData.address,
-            lorryType: formData.lorryType,
-            maxCapacity: Number(formData.maxCapacity) || 0,
-            documents: documentBase64
-          };
+          // Append document files
+          if (documents.license) formDataToSend.append('license', documents.license);
+          if (documents.rc) formDataToSend.append('rc', documents.rc);
+          if (documents.fitness) formDataToSend.append('fitness', documents.fitness);
+          if (documents.insurance) formDataToSend.append('insurance', documents.insurance);
+          if (documents.medical) formDataToSend.append('medical', documents.medical);
+          if (documents.allIndiaPermit) formDataToSend.append('allIndiaPermit', documents.allIndiaPermit);
           
-          console.log('Uploading documents...');
+          console.log('Sending registration request...');
           
-          // Use the authAPI to register the driver with base64 documents
-          const response = await authAPI.driverRegister(driverData);
+          // Use authAPI to register the driver with FormData
+          const response = await authAPI.driverRegister(formDataToSend);
           
           console.log('Registration successful!');
 
@@ -312,7 +251,7 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
             setIsLogin(true);
           }
         } catch (uploadError: any) {
-          console.error('Error processing documents:', uploadError);
+          console.error('Error uploading documents:', uploadError);
           setError(uploadError.response?.data?.msg || 'Error uploading documents. Please try again.');
           setIsLoading(false);
           return;

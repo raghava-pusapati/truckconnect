@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const User = require('../models/User');
 const Driver = require('../models/Driver');
+const { upload } = require('../config/cloudinary');
 
 // Import controller functions
 const { registerUser, loginUser } = require('../controllers/authController');
@@ -161,10 +162,17 @@ router.post('/driver/login', async (req, res) => {
   }
 });
 
-// ✅ Driver-specific Registration Route
-router.post('/driver/register', async (req, res) => {
+// ✅ Driver-specific Registration Route with Cloudinary Upload
+router.post('/driver/register', upload.fields([
+  { name: 'license', maxCount: 1 },
+  { name: 'rc', maxCount: 1 },
+  { name: 'fitness', maxCount: 1 },
+  { name: 'insurance', maxCount: 1 },
+  { name: 'medical', maxCount: 1 },
+  { name: 'allIndiaPermit', maxCount: 1 }
+]), async (req, res) => {
   try {
-    // Extract form data and documents from request body
+    // Extract form data from request body
     const { 
       name, 
       email, 
@@ -172,8 +180,7 @@ router.post('/driver/register', async (req, res) => {
       phone, 
       address, 
       lorryType, 
-      maxCapacity,
-      documents
+      maxCapacity
     } = req.body;
 
     console.log(`Driver registration attempt for: ${email}`);
@@ -184,9 +191,9 @@ router.post('/driver/register', async (req, res) => {
       return res.status(400).json({ msg: 'Please fill all required fields' });
     }
 
-    // Validate required documents
+    // Validate required documents from uploaded files
     const requiredDocuments = ['license', 'rc', 'fitness', 'insurance', 'medical'];
-    const missingDocuments = requiredDocuments.filter(doc => !documents || !documents[doc]);
+    const missingDocuments = requiredDocuments.filter(doc => !req.files || !req.files[doc]);
     
     if (missingDocuments.length > 0) {
       console.log(`Missing document files: ${missingDocuments.join(', ')}`);
@@ -202,7 +209,17 @@ router.post('/driver/register', async (req, res) => {
       return res.status(409).json({ msg: 'Driver already exists with this email' });
     }
 
-    // Create new driver with document base64 data
+    // Extract Cloudinary URLs from uploaded files
+    const documents = {
+      license: req.files.license ? req.files.license[0].path : null,
+      rc: req.files.rc ? req.files.rc[0].path : null,
+      fitness: req.files.fitness ? req.files.fitness[0].path : null,
+      insurance: req.files.insurance ? req.files.insurance[0].path : null,
+      medical: req.files.medical ? req.files.medical[0].path : null,
+      allIndiaPermit: req.files.allIndiaPermit ? req.files.allIndiaPermit[0].path : null
+    };
+
+    // Create new driver with Cloudinary URLs
     console.log('Creating new driver document...');
     const newDriver = new Driver({
       name,
@@ -213,14 +230,7 @@ router.post('/driver/register', async (req, res) => {
       lorryType,
       maxCapacity,
       status: 'pending',
-      documents: {
-        license: documents.license,
-        rc: documents.rc,
-        fitness: documents.fitness,
-        insurance: documents.insurance,
-        medical: documents.medical,
-        allIndiaPermit: documents.allIndiaPermit || null
-      }
+      documents
     });
 
     // Save to database
@@ -231,7 +241,6 @@ router.post('/driver/register', async (req, res) => {
     res.status(201).json({ msg: 'Driver registered successfully. Your account is pending admin approval.' });
   } catch (err) {
     console.error('Driver registration error:', err);
-    
     res.status(500).json({ msg: 'Server error', error: err.message });
   }
 });

@@ -39,30 +39,14 @@ export const authAPI = {
     const response = await api.post('/auth/driver/login', { email, password });
     return response.data;
   },
-  driverRegister: async (driverData: {
-    name: string;
-    email: string;
-    password: string;
-    phone: string;
-    address: string;
-    lorryType: string;
-    maxCapacity: number;
-    documents: {
-      license: string | null;
-      rc: string | null;
-      fitness: string | null;
-      insurance: string | null;
-      medical: string | null;
-      allIndiaPermit: string | null;
-    };
-  }) => {
+  driverRegister: async (formData: FormData) => {
     // Set a longer timeout for document uploads
-    const response = await api.post('/auth/driver/register', driverData, {
+    const response = await api.post('/auth/driver/register', formData, {
       timeout: 60000, // 60 seconds timeout for large uploads
       maxContentLength: Infinity, // Don't limit size in axios (server will validate)
       maxBodyLength: Infinity, // Don't limit size in axios (server will validate)
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
       }
     });
     return response.data;
