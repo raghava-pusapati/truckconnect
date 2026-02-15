@@ -30,6 +30,16 @@ app.get('/api/test', (req, res) => {
   res.send('API is running...');
 });
 
+// Health check endpoint (for keeping server warm)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    mongodb: 'connected'
+  });
+});
+
 // Debug route to check users
 app.get('/api/debug/users', async (req, res) => {
   try {

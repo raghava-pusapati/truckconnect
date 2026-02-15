@@ -1,11 +1,29 @@
 const nodemailer = require('nodemailer');
 
+// Get frontend URL from environment or use default
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://truckconnect.onrender.com';
+
 // Create transporter using environment variables
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD
+  },
+  // Add connection timeout and retry settings
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 10,
+  rateDelta: 1000,
+  rateLimit: 5
+});
+
+// Verify transporter configuration on startup
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('❌ Email service configuration error:', error);
+  } else {
+    console.log('✅ Email service is ready to send messages');
   }
 });
 
@@ -25,7 +43,7 @@ const emailTemplates = {
           <p><strong>Estimated Fare:</strong> ₹${loadDetails.estimatedFare}</p>
         </div>
         <p>Please log in to your dashboard to review the driver's details and assign the load.</p>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Dashboard</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Dashboard</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
@@ -45,7 +63,7 @@ const emailTemplates = {
           <p><strong>Estimated Fare:</strong> ₹${loadDetails.estimatedFare}</p>
         </div>
         <p>Please log in to your dashboard to view customer details and start the delivery.</p>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Dashboard</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Dashboard</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
@@ -65,7 +83,7 @@ const emailTemplates = {
           <p><strong>Fare:</strong> ₹${loadDetails.estimatedFare}</p>
         </div>
         <p>${isDriver ? 'Please rate your experience with the customer.' : 'Please rate your experience with the driver.'}</p>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Rate Now</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Rate Now</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
@@ -83,7 +101,7 @@ const emailTemplates = {
           ${comment ? `<p><strong>Comment:</strong> ${comment}</p>` : ''}
         </div>
         <p>Keep up the great work!</p>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #f59e0b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Profile</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #f59e0b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Profile</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
@@ -101,7 +119,7 @@ const emailTemplates = {
           <p><strong>Expiry Date:</strong> ${new Date(expiryDate).toLocaleDateString()}</p>
         </div>
         <p>Please update your document to continue receiving load assignments.</p>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #ef4444; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Update Document</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #ef4444; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Update Document</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
@@ -122,7 +140,7 @@ const emailTemplates = {
             <li>Start earning with TruckConnect</li>
           </ul>
         </div>
-        <a href="http://localhost:5173" style="display: inline-block; background-color: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Start Browsing Loads</a>
+        <a href="${FRONTEND_URL}" style="display: inline-block; background-color: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Start Browsing Loads</a>
         <p style="margin-top: 20px; color: #666; font-size: 12px;">This is an automated email from TruckConnect. Please do not reply.</p>
       </div>
     `
