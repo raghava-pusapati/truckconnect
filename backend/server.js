@@ -13,6 +13,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Add request timeout middleware (30 seconds max)
+app.use((req, res, next) => {
+  req.setTimeout(30000); // 30 seconds
+  res.setTimeout(30000);
+  next();
+});
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/password-reset', require('./routes/passwordResetRoutes'));

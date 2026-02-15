@@ -163,7 +163,7 @@ const emailTemplates = {
   })
 };
 
-// Send email function
+// Send email function with timeout protection
 const sendEmail = async (to, template) => {
   try {
     const mailOptions = {
@@ -173,11 +173,19 @@ const sendEmail = async (to, template) => {
       html: template.html
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId);
+    // Set a timeout of 10 seconds for email sending
+    const emailPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email timeout after 10 seconds')), 10000)
+    );
+
+    const info = await Promise.race([emailPromise, timeoutPromise]);
+    console.log('✅ Email sent:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error.message);
+    // Don't throw error - just log it and continue
+    // This prevents email failures from blocking the main request
     return { success: false, error: error.message };
   }
 };
