@@ -1,37 +1,17 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 // Get frontend URL from environment or use default
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://truckconnect.onrender.com';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://truckconnect-frontend.onrender.com';
 
-// Create transporter using environment variables
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD
-  },
-  // Add connection timeout and retry settings
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 10,
-  rateDelta: 1000,
-  rateLimit: 5,
-  // Connection timeouts
-  connectionTimeout: 30000, // 30 seconds
-  greetingTimeout: 30000,
-  socketTimeout: 60000
-});
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify transporter configuration on startup (but don't block)
-setImmediate(() => {
-  transporter.verify(function(error, success) {
-    if (error) {
-      console.error('❌ Email service configuration error:', error.message);
-    } else {
-      console.log('✅ Email service is ready to send messages');
-    }
-  });
-});
+// Verify Resend configuration on startup
+if (!process.env.RESEND_API_KEY) {
+  console.error('❌ RESEND_API_KEY is not set in environment variables');
+} else {
+  console.log('✅ Resend email service initialized');
+}
 
 // Email templates
 const emailTemplates = {
@@ -95,7 +75,7 @@ const emailTemplates = {
     `
   }),
 
-  newRating: (userName, raterName, rating, comment, isDriver) => ({
+  newRating: (userName, raterName, rating, comment) => ({
     subject: `New Rating Received - ${rating} Stars`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -169,29 +149,25 @@ const emailTemplates = {
   })
 };
 
-// Send email function with timeout protection
+// Send email function using Resend
 const sendEmail = async (to, template) => {
-  // Don't await - send email in background
+  // Send email in background (non-blocking)
   setImmediate(async () => {
     try {
-      const mailOptions = {
-        from: `"TruckConnect" <${process.env.EMAIL_USER}>`,
-        to,
+      const { data, error } = await resend.emails.send({
+        from: 'TruckConnect <onboarding@resend.dev>',
+        to: [to],
         subject: template.subject,
-        html: template.html
-      };
+        html: template.html,
+      });
 
-      // Set a timeout of 30 seconds for email sending
-      const emailPromise = transporter.sendMail(mailOptions);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Email timeout after 30 seconds')), 30000)
-      );
-
-      const info = await Promise.race([emailPromise, timeoutPromise]);
-      console.log('✅ Email sent:', info.messageId);
+      if (error) {
+        console.error('❌ Error sending email:', error);
+      } else {
+        console.log('✅ Email sent successfully:', data.id);
+      }
     } catch (error) {
       console.error('❌ Error sending email:', error.message);
-      // Don't throw - just log and continue
     }
   });
   
@@ -216,7 +192,7 @@ module.exports = {
   },
 
   sendNewRatingEmail: async (userEmail, userName, raterName, rating, comment, isDriver) => {
-    const template = emailTemplates.newRating(userName, raterName, rating, comment, isDriver);
+    const template = emailTemplates.newRating(userName, raterName, rating, comment);
     return await sendEmail(userEmail, template);
   },
 
