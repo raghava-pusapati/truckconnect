@@ -1,16 +1,20 @@
-const { Resend } = require('resend');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
 // Get frontend URL from environment or use default
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://truckconnect-frontend.onrender.com';
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Brevo (Sendinblue) API
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
-// Verify Resend configuration on startup
-if (!process.env.RESEND_API_KEY) {
-  console.error('❌ RESEND_API_KEY is not set in environment variables');
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// Verify Brevo configuration on startup
+if (!process.env.BREVO_API_KEY) {
+  console.error('❌ BREVO_API_KEY is not set in environment variables');
 } else {
-  console.log('✅ Resend email service initialized');
+  console.log('✅ Brevo email service initialized');
 }
 
 // Email templates
@@ -149,36 +153,25 @@ const emailTemplates = {
   })
 };
 
-// Send email function using Resend
+// Send email function using Brevo
 const sendEmail = async (to, template) => {
   // Send email in background (non-blocking)
   setImmediate(async () => {
     try {
-      // TEMPORARY: For Resend free tier without domain verification,
-      // send all emails to the verified email for testing
-      const testMode = !process.env.RESEND_DOMAIN_VERIFIED;
-      const recipientEmail = testMode ? 'truckconnect.team@gmail.com' : to;
+      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
       
-      if (testMode && to !== 'truckconnect.team@gmail.com') {
-        console.log(`📧 TEST MODE: Email for ${to} redirected to truckconnect.team@gmail.com`);
-        console.log(`� Subject: ${template.subject}`);
-      }
-      
-      const { data, error } = await resend.emails.send({
-        from: 'TruckConnect <onboarding@resend.dev>',
-        to: [recipientEmail],
-        subject: testMode && to !== recipientEmail ? `[TEST for ${to}] ${template.subject}` : template.subject,
-        html: template.html,
-      });
+      sendSmtpEmail.sender = { name: 'TruckConnect', email: 'truckconnect.team@gmail.com' };
+      sendSmtpEmail.to = [{ email: to }];
+      sendSmtpEmail.subject = template.subject;
+      sendSmtpEmail.htmlContent = template.html;
 
-      if (error) {
-        console.error('❌ Error sending email:', error);
-        console.log('💡 To send to all users, verify your domain at: https://resend.com/domains');
-      } else {
-        console.log('✅ Email sent successfully:', data.id);
-      }
+      const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+      console.log('✅ Email sent successfully:', data.messageId);
     } catch (error) {
       console.error('❌ Error sending email:', error.message);
+      if (error.response) {
+        console.error('Error details:', error.response.text);
+      }
     }
   });
   
