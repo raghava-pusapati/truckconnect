@@ -15,16 +15,22 @@ const transporter = nodemailer.createTransport({
   maxConnections: 5,
   maxMessages: 10,
   rateDelta: 1000,
-  rateLimit: 5
+  rateLimit: 5,
+  // Connection timeouts
+  connectionTimeout: 30000, // 30 seconds
+  greetingTimeout: 30000,
+  socketTimeout: 60000
 });
 
-// Verify transporter configuration on startup
-transporter.verify(function(error, success) {
-  if (error) {
-    console.error('❌ Email service configuration error:', error);
-  } else {
-    console.log('✅ Email service is ready to send messages');
-  }
+// Verify transporter configuration on startup (but don't block)
+setImmediate(() => {
+  transporter.verify(function(error, success) {
+    if (error) {
+      console.error('❌ Email service configuration error:', error.message);
+    } else {
+      console.log('✅ Email service is ready to send messages');
+    }
+  });
 });
 
 // Email templates
@@ -165,29 +171,32 @@ const emailTemplates = {
 
 // Send email function with timeout protection
 const sendEmail = async (to, template) => {
-  try {
-    const mailOptions = {
-      from: `"TruckConnect" <${process.env.EMAIL_USER}>`,
-      to,
-      subject: template.subject,
-      html: template.html
-    };
+  // Don't await - send email in background
+  setImmediate(async () => {
+    try {
+      const mailOptions = {
+        from: `"TruckConnect" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: template.subject,
+        html: template.html
+      };
 
-    // Set a timeout of 10 seconds for email sending
-    const emailPromise = transporter.sendMail(mailOptions);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Email timeout after 10 seconds')), 10000)
-    );
+      // Set a timeout of 30 seconds for email sending
+      const emailPromise = transporter.sendMail(mailOptions);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email timeout after 30 seconds')), 30000)
+      );
 
-    const info = await Promise.race([emailPromise, timeoutPromise]);
-    console.log('✅ Email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('❌ Error sending email:', error.message);
-    // Don't throw error - just log it and continue
-    // This prevents email failures from blocking the main request
-    return { success: false, error: error.message };
-  }
+      const info = await Promise.race([emailPromise, timeoutPromise]);
+      console.log('✅ Email sent:', info.messageId);
+    } catch (error) {
+      console.error('❌ Error sending email:', error.message);
+      // Don't throw - just log and continue
+    }
+  });
+  
+  // Return immediately without waiting for email
+  return { success: true, queued: true };
 };
 
 module.exports = {
