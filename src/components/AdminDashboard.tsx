@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Driver, User } from '../types';
-import { ArrowLeft, CheckCircle, XCircle, UserCheck, UserX } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, UserCheck, UserX, BarChart3 } from 'lucide-react';
 import { driverAPI } from '../api';
+import AdminAnalytics from './AdminAnalytics';
+import { useTranslation } from 'react-i18next';
 
 interface AdminDashboardProps {
   currentUser: User;
@@ -10,12 +12,14 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'pending' | 'accepted' | 'rejected'>('pending');
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'pending' | 'accepted' | 'rejected' | 'analytics'>('pending');
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is logged in and token exists
@@ -25,7 +29,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
       return;
     }
 
-    fetchDrivers();
+    // Only fetch drivers if not on analytics tab
+    if (activeTab !== 'analytics') {
+      fetchDrivers();
+    }
   }, [activeTab]);
 
   const fetchDrivers = async () => {
@@ -166,116 +173,64 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
       );
     }
 
-    // Helper function to get document URL
-    const getDocumentUrl = (driverId: string, documentType: string): string => {
-      // Base URL for document storage
-      const baseUrl = 'https://truckconnect-backend.onrender.com/uploads/drivers';
-      
-      // Map document types to file extensions
-      const extensions: Record<string, string> = {
-        license: 'jpg',
-        rc: 'jpg',
-        fitness: 'jpg',
-        insurance: 'pdf',
-        medical: 'pdf',
-        allIndiaPermit: 'pdf'
-      };
-      
-      // Get extension for this document type
-      const extension = extensions[documentType] || 'jpg';
-      
-      // Return formatted URL
-      return `${baseUrl}/${driverId}/${documentType}.${extension}`;
-    };
-
     console.log('Driver documents:', driver.documents);
 
-    // Check if document URLs exist and if not, generate them
+    // Helper function to get document URL - handles both old and new format
+    const getDocumentUrl = (doc: any): string | null => {
+      if (!doc) return null;
+      // New format: { url: "..." }
+      if (typeof doc === 'object' && doc.url) return doc.url;
+      // Old format: just a string URL
+      if (typeof doc === 'string') return doc;
+      return null;
+    };
+
     const documentUrls = {
-      license: driver.documents.license || getDocumentUrl(driver.id, 'license'),
-      rc: driver.documents.rc || getDocumentUrl(driver.id, 'rc'),
-      fitness: driver.documents.fitness || getDocumentUrl(driver.id, 'fitness'),
-      insurance: driver.documents.insurance || getDocumentUrl(driver.id, 'insurance'),
-      medical: driver.documents.medical || getDocumentUrl(driver.id, 'medical'),
-      allIndiaPermit: driver.documents.allIndiaPermit || getDocumentUrl(driver.id, 'allIndiaPermit')
+      license: getDocumentUrl(driver.documents.license),
+      rc: getDocumentUrl(driver.documents.rc),
+      fitness: getDocumentUrl(driver.documents.fitness),
+      insurance: getDocumentUrl(driver.documents.insurance),
+      medical: getDocumentUrl(driver.documents.medical),
+      allIndiaPermit: getDocumentUrl(driver.documents.allIndiaPermit)
+    };
+
+    const renderDocument = (url: string | null, label: string) => {
+      if (!url) {
+        return (
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">{label}</h4>
+            <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center">
+              <p className="text-gray-500 text-sm">Not uploaded</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">{label}</h4>
+          <img 
+            src={url} 
+            alt={label} 
+            className="w-full h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => setSelectedImage(url)}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
+            }}
+          />
+        </div>
+      );
     };
 
     return (
       <div className="mt-4 grid grid-cols-3 gap-4">
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Driver's License</h4>
-          <img 
-            src={documentUrls.license} 
-            alt="License" 
-            className="w-full h-40 object-cover rounded-lg" 
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-            }}
-          />
-        </div>
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">RC Book</h4>
-          <img 
-            src={documentUrls.rc} 
-            alt="RC Book" 
-            className="w-full h-40 object-cover rounded-lg" 
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-            }}
-          />
-        </div>
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Fitness Certificate</h4>
-          <img 
-            src={documentUrls.fitness} 
-            alt="Fitness Certificate" 
-            className="w-full h-40 object-cover rounded-lg" 
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-            }}
-          />
-        </div>
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Insurance</h4>
-          <img 
-            src={documentUrls.insurance} 
-            alt="Insurance" 
-            className="w-full h-40 object-cover rounded-lg" 
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-            }}
-          />
-        </div>
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Medical Certificate</h4>
-          <img 
-            src={documentUrls.medical} 
-            alt="Medical Certificate" 
-            className="w-full h-40 object-cover rounded-lg" 
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-            }}
-          />
-        </div>
-        {(driver.documents.allIndiaPermit || true) && (
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">All India Permit</h4>
-            <img 
-              src={documentUrls.allIndiaPermit} 
-              alt="All India Permit" 
-              className="w-full h-40 object-cover rounded-lg" 
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Document+Unavailable';
-              }}
-            />
-          </div>
-        )}
+        {renderDocument(documentUrls.license, "Driver's License")}
+        {renderDocument(documentUrls.rc, "RC Book")}
+        {renderDocument(documentUrls.fitness, "Fitness Certificate")}
+        {renderDocument(documentUrls.insurance, "Insurance")}
+        {renderDocument(documentUrls.medical, "Medical Certificate")}
+        {renderDocument(documentUrls.allIndiaPermit, "All India Permit")}
       </div>
     );
   };
@@ -295,7 +250,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
             }`}
           >
             <UserCheck className="h-5 w-5 mr-2" />
-            Pending Drivers
+            {t('admin.pendingDrivers')}
           </button>
           <button
             onClick={() => setActiveTab('accepted')}
@@ -306,7 +261,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
             }`}
           >
             <CheckCircle className="h-5 w-5 mr-2" />
-            Accepted Drivers
+            {t('admin.acceptedDrivers')}
           </button>
           <button
             onClick={() => setActiveTab('rejected')}
@@ -317,7 +272,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
             }`}
           >
             <XCircle className="h-5 w-5 mr-2" />
-            Rejected Drivers
+            {t('admin.rejectedDrivers')}
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`flex items-center px-4 py-2 rounded-md ${
+              activeTab === 'analytics'
+                ? 'bg-amber-700 text-white'
+                : 'bg-white text-amber-800 hover:bg-amber-50'
+            }`}
+          >
+            <BarChart3 className="h-5 w-5 mr-2" />
+            {t('admin.analytics')}
           </button>
         </div>
       </div>
@@ -338,7 +304,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
             <>
               {getPendingDrivers().length === 0 ? (
                 <div className="bg-white rounded-lg shadow-lg p-6 border border-amber-200 text-center">
-                  <p className="text-amber-800">No pending driver applications found.</p>
+                  <p className="text-amber-800">{t('messages.noDriversFound')}</p>
                 </div>
               ) : (
                 getPendingDrivers().map(driver => (
@@ -359,13 +325,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
                           onClick={() => handleAcceptDriver(driver.id)}
                           className="px-4 py-2 bg-amber-700 text-white rounded-md hover:bg-amber-800"
                         >
-                          Accept
+                          {t('admin.accept')}
                         </button>
                         <button
                           onClick={() => setSelectedDriver(driver.id)}
                           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                         >
-                          Reject
+                          {t('admin.reject')}
                         </button>
                       </div>
                     </div>
@@ -373,7 +339,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
                     {selectedDriver === driver.id && (
                       <div className="mt-4">
                         <textarea
-                          placeholder="Enter reason for rejection"
+                          placeholder={t('admin.rejectionReason')}
                           className="w-full p-2 border border-amber-200 rounded-md"
                           value={rejectionReason}
                           onChange={(e) => setRejectionReason(e.target.value)}
@@ -383,7 +349,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
                             onClick={() => handleRejectDriver(driver.id)}
                             className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                           >
-                            Confirm Rejection
+                            {t('admin.reject')}
                           </button>
                           <button
                             onClick={() => {
@@ -392,7 +358,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
                             }}
                             className="px-4 py-2 bg-amber-700 text-white rounded-md hover:bg-amber-800"
                           >
-                            Cancel
+                            {t('common.cancel')}
                           </button>
                         </div>
                       </div>
@@ -470,6 +436,35 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
               )}
             </>
           )}
+          
+          {activeTab === 'analytics' && (
+            <AdminAnalytics />
+          )}
+        </div>
+      )}
+
+      {/* Full-size image modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-7xl max-h-full">
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-white text-gray-800 rounded-full p-2 hover:bg-gray-200 transition-colors z-10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Full size document" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -477,3 +472,4 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
 };
 
 export default AdminDashboard;
+

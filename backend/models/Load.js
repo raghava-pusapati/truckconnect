@@ -26,6 +26,13 @@ const loadSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  description: {
+    type: String,
+    default: ''
+  },
+  estimatedDeliveryDate: {
+    type: Date
+  },
   status: {
     type: String,
     enum: ['pending', 'assigned', 'completed', 'cancelled'],
@@ -53,6 +60,14 @@ const loadSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
+    averageRating: {
+      type: Number,
+      default: 0
+    },
+    totalRatings: {
+      type: Number,
+      default: 0
+    },
     documents: {
       license: String,
       rc: String,
@@ -74,7 +89,24 @@ const loadSchema = new mongoose.Schema({
     assignedAt: {
       type: Date,
       default: null
+    },
+    averageRating: {
+      type: Number,
+      default: 0
+    },
+    totalRatings: {
+      type: Number,
+      default: 0
     }
+  },
+  // Rating flags
+  customerRated: {
+    type: Boolean,
+    default: false
+  },
+  driverRated: {
+    type: Boolean,
+    default: false
   }
 });
 

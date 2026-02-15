@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { User } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface LoginData {
   email: string;
@@ -12,6 +14,8 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginData>({
@@ -101,6 +105,18 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
               </div>
             </div>
 
+            <div className="flex items-center justify-end">
+              <div className="text-sm">
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="font-medium text-orange-600 hover:text-orange-500"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            </div>
+
             <div>
               <button
                 type="submit"
@@ -134,3 +150,4 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
 };
 
 export default Login; 
+

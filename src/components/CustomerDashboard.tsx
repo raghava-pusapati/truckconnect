@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, ClipboardList, ClipboardCheck, UserCheck, ChevronDown, ChevronUp, ExternalLink, Trash2 } from 'lucide-react';
+import { Plus, ClipboardList, ClipboardCheck, UserCheck, ChevronDown, ChevronUp, ExternalLink, Trash2, BarChart3, Star, User as UserIcon, Edit } from 'lucide-react';
 import { User } from '../types';
 import { loadAPI } from '../api';
+import CustomerAnalytics from './CustomerAnalytics';
+import RatingModal from './RatingModal';
+import ProfileManagement from './ProfileManagement';
+import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { API_BASE_URL } from '../config';
 
 interface Driver {
   driverId: string;
@@ -41,6 +49,8 @@ interface Load {
   completedAt?: string;
   assignedDriver?: Driver;
   applicants?: DriverApplicant[];
+  driverRated?: boolean;
+  customerRated?: boolean;
 }
 
 interface LoadWithApplicants extends Load {
@@ -55,11 +65,39 @@ interface CustomerDashboardProps {
 }
 
 const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLogout, onBack }) => {
+  const { t } = useTranslation();
   const [myLoads, setMyLoads] = useState<LoadWithApplicants[]>([]);
   const [activeTab, setActiveTab] = useState<string>('post');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+  
+  // Rating modal state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingLoadId, setRatingLoadId] = useState<string>('');
+  const [ratingDriverId, setRatingDriverId] = useState<string>('');
+  const [ratingDriverName, setRatingDriverName] = useState<string>('');
+  
+  // Delivery date state
+  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState<Date | null>(null);
+
+  // Edit load state
+  const [editingLoadId, setEditingLoadId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<{
+    source: string;
+    destination: string;
+    loadType: string;
+    quantity: string;
+    estimatedFare: string;
+    description: string;
+  }>({
+    source: '',
+    destination: '',
+    loadType: '',
+    quantity: '',
+    estimatedFare: '',
+    description: ''
+  });
 
   // Helper function to extract ID value from MongoDB ObjectId
   const extractIdFromMongoObject = (obj: any): string => {
@@ -108,6 +146,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               lorryType: applicant.lorryType || 'Not specified',
               maxCapacity: applicant.maxCapacity || 'Not specified',
               appliedAt: applicant.appliedAt || new Date().toISOString(),
+              // ✅ INCLUDE RATINGS
+              averageRating: applicant.averageRating || 0,
+              totalRatings: applicant.totalRatings || 0,
               // Include other fields if they exist
               email: applicant.email,
               address: applicant.address,
@@ -126,7 +167,10 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
             mobile: load.assignedDriver.mobile || 'No phone',
             lorryType: load.assignedDriver.lorryType || 'Not specified',
             maxCapacity: load.assignedDriver.maxCapacity || 'Not specified',
-            assignedAt: load.assignedDriver.assignedAt || new Date().toISOString()
+            assignedAt: load.assignedDriver.assignedAt || new Date().toISOString(),
+            // ✅ INCLUDE RATINGS
+            averageRating: load.assignedDriver.averageRating || 0,
+            totalRatings: load.assignedDriver.totalRatings || 0
           };
         }
         
@@ -208,11 +252,19 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
         
         const fetchedApplicants = await Promise.race([fetchPromise, timeoutPromise]);
         
+        console.log('RAW API RESPONSE:', fetchedApplicants);
+        console.log('Response is array:', Array.isArray(fetchedApplicants));
+        if (Array.isArray(fetchedApplicants) && fetchedApplicants.length > 0) {
+          console.log('First applicant raw data:', JSON.stringify(fetchedApplicants[0], null, 2));
+        }
+        
         // If we got applicants back and they are an array, process them
         if (fetchedApplicants && Array.isArray(fetchedApplicants)) {
           // Process each applicant to ensure document data is preserved
           applicants = fetchedApplicants.map(applicant => {
             console.log('Processing applicant data:', applicant);
+            console.log('Applicant averageRating:', applicant.averageRating);
+            console.log('Applicant totalRatings:', applicant.totalRatings);
             
             return {
               driverId: applicant.driverId || applicant._id,
@@ -223,6 +275,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               lorryType: applicant.lorryType || 'Unknown',
               maxCapacity: applicant.maxCapacity || '0',
               appliedAt: applicant.appliedAt || new Date().toISOString(),
+              // Include rating data
+              averageRating: applicant.averageRating || 0,
+              totalRatings: applicant.totalRatings || 0,
               // Ensure we preserve all document data
               documents: {
                 license: applicant.documents?.license || null,
@@ -241,6 +296,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
         console.error('API error details:', apiError);
         // Show a more user-friendly error message
         setError('Could not load driver applicants. Please try again later.');
+        toast.error('Could not load driver applicants');
         // Continue with empty array rather than aborting
         applicants = [];
       }
@@ -257,16 +313,13 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
     } catch (error: any) {
       console.error('Error in toggleApplicants:', error);
       setError('An error occurred while fetching driver information.');
+      toast.error('An error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   const assignLoadToDriver = async (loadId: string, driverId: string) => {
-    if (!confirm('Are you sure you want to assign this load to this driver?')) {
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
@@ -304,7 +357,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
         })
       );
       
-      alert('Load assigned successfully!');
+      toast.success('Load assigned successfully!');
       // Refresh loads to get the updated data
       fetchLoads();
     } catch (error: any) {
@@ -313,8 +366,10 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       // Show a more specific message if the driver already has an assigned load
       if (error.message && error.message.includes('already has an assigned load')) {
         setError('This driver already has an assigned load. Please choose another driver or wait until they complete their current job.');
+        toast.error('Driver already has an assigned load');
       } else {
         setError(`Failed to assign load: ${error.message}`);
+        toast.error('Failed to assign load');
       }
     } finally {
       setIsLoading(false);
@@ -333,7 +388,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       destination: formData.get('destination') as string,
       loadType: formData.get('loadType') as string,
       quantity: Number(formData.get('quantity')),
-      estimatedFare: Number(formData.get('estimatedFare'))
+      estimatedFare: Number(formData.get('estimatedFare')),
+      description: formData.get('description') as string || '',
+      estimatedDeliveryDate: estimatedDeliveryDate ? estimatedDeliveryDate.toISOString() : null
     };
 
     try {
@@ -353,21 +410,19 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       ]);
       
       form.reset();
+      setEstimatedDeliveryDate(null);
       setActiveTab('view');
+      toast.success('Load created successfully!');
     } catch (error: any) {
       console.error('Error creating load:', error);
       setError('Failed to create load. Please try again.');
+      toast.error('Failed to create load');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCompleteLoad = async (loadId: string) => {
-    // Add confirmation dialog
-    if (!confirm('Are you sure you want to mark this load as completed?')) {
-      return;
-    }
-    
     try {
       setIsLoading(true);
       setError(null);
@@ -385,21 +440,32 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       );
       
       // Show confirmation
-      alert('Load marked as completed successfully!');
+      toast.success('Load marked as completed successfully!');
     } catch (error: any) {
       console.error('Error completing load:', error);
       setError('Failed to complete load. Please try again.');
+      toast.error('Failed to complete load');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDeleteLoad = async (loadId: string) => {
-    // Add confirmation dialog
-    if (!confirm('Are you sure you want to cancel this load? This action cannot be undone.')) {
-      return;
+  const openRatingModal = (load: Load) => {
+    if (load.assignedDriver) {
+      setRatingLoadId(load.id);
+      setRatingDriverId(load.assignedDriver.driverId);
+      setRatingDriverName(load.assignedDriver.name);
+      setShowRatingModal(true);
     }
-    
+  };
+
+  const handleRatingSuccess = async () => {
+    setShowRatingModal(false);
+    await fetchLoads(); // Refresh loads to update rating status
+    toast.success(t('rating.ratingSuccess'));
+  };
+
+  const handleDeleteLoad = async (loadId: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -411,10 +477,83 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       setMyLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
       
       // Show confirmation
-      alert('Load cancelled successfully!');
+      toast.success('Load cancelled successfully!');
     } catch (error: any) {
       console.error('Error cancelling load:', error);
       setError('Failed to cancel load. Please try again.');
+      toast.error('Failed to cancel load');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditLoad = (load: Load) => {
+    setEditingLoadId(load.id);
+    setEditFormData({
+      source: load.source,
+      destination: load.destination,
+      loadType: load.loadType,
+      quantity: load.quantity,
+      estimatedFare: load.estimatedFare,
+      description: load.description || ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingLoadId(null);
+    setEditFormData({
+      source: '',
+      destination: '',
+      loadType: '',
+      quantity: '',
+      estimatedFare: '',
+      description: ''
+    });
+  };
+
+  const handleUpdateLoad = async (loadId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Update the load using the API - use /edit endpoint
+      const response = await fetch(`${API_BASE_URL}/loads/${loadId}/edit`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': localStorage.getItem('token') || ''
+        },
+        body: JSON.stringify({
+          source: editFormData.source,
+          destination: editFormData.destination,
+          loadType: editFormData.loadType,
+          quantity: Number(editFormData.quantity),
+          estimatedFare: Number(editFormData.estimatedFare),
+          description: editFormData.description
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || 'Failed to update load');
+      }
+
+      const result = await response.json();
+      const updatedLoad = result.load || result;
+
+      // Update UI
+      setMyLoads(prevLoads => prevLoads.map(load => 
+        load.id === loadId ? { ...load, ...updatedLoad, id: loadId } : load
+      ));
+
+      // Reset edit state
+      handleCancelEdit();
+
+      toast.success(t('messages.loadUpdated'));
+    } catch (error: any) {
+      console.error('Error updating load:', error);
+      setError('Failed to update load. Please try again.');
+      toast.error(t('messages.failedToUpdate'));
     } finally {
       setIsLoading(false);
     }
@@ -604,17 +743,22 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
     if (applicants.length === 0) {
       return (
         <div className="mt-4 p-4 bg-amber-50 rounded-md">
-          <p className="text-amber-800 text-center">No drivers have applied for this load yet.</p>
+          <p className="text-amber-800 text-center">{t('messages.noApplicants')}</p>
           <p className="text-amber-700 text-sm text-center mt-2">Check back later for applications.</p>
         </div>
       );
     }
     
     console.log('Rendering applicants:', applicants);
+    console.log('Applicant ratings:', applicants.map(a => ({
+      name: a.name,
+      averageRating: a.averageRating,
+      totalRatings: a.totalRatings
+    })));
     
     return (
       <div className="mt-4">
-        <h4 className="text-lg font-semibold text-amber-800 mb-2">Driver Applicants</h4>
+        <h4 className="text-lg font-semibold text-amber-800 mb-2">{t('customer.applicants')}</h4>
         <div className="space-y-4">
           {applicants.map((applicant, index) => (
             <div key={applicant.driverId || index} className="border border-amber-200 rounded-md p-4 bg-amber-50">
@@ -623,12 +767,23 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                 <div className="flex-grow">
                   <h5 className="font-semibold text-amber-800 text-lg">{applicant.name || 'Unknown Driver'}</h5>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-3">
-                    <p className="text-sm"><span className="font-medium">Phone:</span> {applicant.mobile || 'Not provided'}</p>
-                    <p className="text-sm"><span className="font-medium">Lorry Type:</span> {applicant.lorryType || 'Not specified'}</p>
-                    <p className="text-sm"><span className="font-medium">Capacity:</span> {applicant.maxCapacity || '0'} tons</p>
+                    <p className="text-sm"><span className="font-medium">{t('auth.phone')}:</span> {applicant.mobile || 'Not provided'}</p>
+                    <p className="text-sm"><span className="font-medium">{t('driver.lorryType')}:</span> {applicant.lorryType || 'Not specified'}</p>
+                    <p className="text-sm"><span className="font-medium">{t('driver.maxCapacity')}:</span> {applicant.maxCapacity || '0'} tons</p>
                     {applicant.appliedAt && (
                       <p className="text-sm">
-                        <span className="font-medium">Applied:</span> {new Date(applicant.appliedAt).toLocaleString()}
+                        <span className="font-medium">{t('customer.createdAt')}:</span> {new Date(applicant.appliedAt).toLocaleString()}
+                      </p>
+                    )}
+                    {/* Show driver's average rating */}
+                    {applicant.averageRating !== undefined && applicant.averageRating > 0 && (
+                      <p className="text-sm flex items-center">
+                        <span className="font-medium">{t('rating.averageRating')}:</span>
+                        <span className="ml-1 flex items-center text-yellow-600">
+                          {applicant.averageRating.toFixed(1)}
+                          <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400" />
+                          <span className="text-gray-600 ml-1">({applicant.totalRatings || 0})</span>
+                        </span>
                       </p>
                     )}
                   </div>
@@ -637,7 +792,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     onClick={() => setSelectedDriverId(selectedDriverId === applicant.driverId ? null : applicant.driverId)}
                     className="mt-3 text-amber-700 text-sm underline"
                   >
-                    {selectedDriverId === applicant.driverId ? 'Hide documents' : 'View documents'}
+                    {selectedDriverId === applicant.driverId ? t('customer.hideApplicants') : t('customer.viewApplicants')}
                   </button>
                   
                   {selectedDriverId === applicant.driverId && renderDriverDocuments(applicant)}
@@ -649,12 +804,12 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     onClick={() => assignLoadToDriver(load.id, applicant.driverId)}
                     className="bg-amber-600 text-white px-5 py-2 rounded-md hover:bg-amber-700 w-full md:w-auto text-center font-medium"
                   >
-                    Assign Load
+                    {t('customer.assignDriver')}
                   </button>
                   
                   {/* Show driver availability status info - this will be updated by the API */}
                   <div className="mt-3 text-xs text-gray-600 max-w-[200px]">
-                    Note: If a driver has an existing assigned load, they will not be available until their current job is completed.
+                    {t('messages.driverAvailability') || 'Note: If a driver has an existing assigned load, they will not be available until their current job is completed.'}
                   </div>
                 </div>
               </div>
@@ -685,7 +840,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
       <div className="min-h-screen bg-amber-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-amber-800">Customer Dashboard</h1>
+            <h1 className="text-3xl font-bold text-amber-800">{t('customer.dashboard')}</h1>
             
           </div>
 
@@ -706,7 +861,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               }`}
             >
               <Plus className="w-5 h-5 mr-2" />
-              Post a Load
+              {t('customer.postLoad')}
             </button>
             <button
               onClick={() => setActiveTab('view')}
@@ -717,7 +872,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               }`}
             >
               <ClipboardList className="w-5 h-5 mr-2" />
-              View My Loads
+              {t('customer.myLoads')}
             </button>
             <button
               onClick={() => setActiveTab('completed')}
@@ -728,7 +883,29 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               }`}
             >
               <ClipboardCheck className="w-5 h-5 mr-2" />
-              Completed Loads
+              {t('customer.completedLoads')}
+            </button>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                activeTab === 'analytics'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-white text-amber-800'
+              }`}
+            >
+              <BarChart3 className="w-5 h-5 mr-2" />
+              {t('customer.analytics')}
+            </button>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                activeTab === 'profile'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-white text-amber-800'
+              }`}
+            >
+              <UserIcon className="w-5 h-5 mr-2" />
+              {t('profile.title')}
             </button>
           </div>
 
@@ -741,10 +918,10 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
           {/* Post a Load Form */}
           {!isLoading && activeTab === 'post' && (
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold text-amber-800 mb-4">Post New Load</h2>
+              <h2 className="text-xl font-semibold text-amber-800 mb-4">{t('customer.postLoad')}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Source <span className='text-green-500'>(Start Point -Along with Exact Address)</span></label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.source')} <span className='text-green-500'>(Start Point -Along with Exact Address)</span></label>
                   <input
                     type="text"
                     name="source"
@@ -753,7 +930,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Destination <span className='text-green-500'>(End Point -Along with Exact Address)</span></label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.destination')} <span className='text-green-500'>(End Point -Along with Exact Address)</span></label>
                   <input
                     type="text"
                     name="destination"
@@ -762,7 +939,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Load Type & Description about load</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.loadType')} & Description about load</label>
                   <input
                     type="text"
                     name="loadType"
@@ -771,7 +948,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Quantity (enter only in tons)</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.quantity')} (enter only in tons)</label>
                   <input
                     type="number"
                     name="quantity"
@@ -781,7 +958,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Estimated Fare (₹)</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.estimatedFare')} (₹)</label>
                   <input
                     type="number"
                     name="estimatedFare"
@@ -790,12 +967,32 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.description')}</label>
+                  <textarea
+                    name="description"
+                    rows={3}
+                    placeholder={t('customer.descriptionPlaceholder')}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.estimatedDeliveryDate')}</label>
+                  <DatePicker
+                    selected={estimatedDeliveryDate}
+                    onChange={(date) => setEstimatedDeliveryDate(date)}
+                    minDate={new Date()}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText={t('customer.selectDeliveryDate')}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                  />
+                </div>
                 <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
                 >
-                  {isLoading ? 'Posting...' : 'Post Load'}
+                  {isLoading ? t('common.loading') : t('customer.postLoad')}
                 </button>
               </form>
             </div>
@@ -808,79 +1005,178 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                 <div key={load.id} className={`bg-white p-6 rounded-lg shadow-md relative ${
                   load.status === 'assigned' ? 'border-l-4 border-green-500' : ''
                 }`}>
-                  {/* Only show delete button for pending loads, not for assigned loads */}
-                  {load.status === 'pending' && (
-                    <button
-                      onClick={() => handleDeleteLoad(load.id)}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
-                      title="Cancel Load"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                  {/* Only show edit and delete buttons for pending loads, not for assigned loads */}
+                  {load.status === 'pending' && editingLoadId !== load.id && (
+                    <div className="absolute top-2 right-2 flex space-x-1">
+                      <button
+                        onClick={() => handleEditLoad(load)}
+                        className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50"
+                        title={t('customer.editLoad')}
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLoad(load.id)}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+                        title="Cancel Load"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   )}
                   
-                  <h3 className="text-xl font-semibold text-amber-800 mb-4 pr-8">
-                    {load.source} → {load.destination}
-                  </h3>
-                  <div className="space-y-2">
-                    <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
-                    <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
-                    <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
-                    <p>
-                      <span className="font-medium">Status:</span>{' '}
-                      <span className={`${
-                        load.status === 'pending' 
-                          ? 'text-orange-600' 
-                          : load.status === 'assigned' 
-                            ? 'text-green-600' 
-                            : 'text-blue-600'
-                      } font-medium`}>
-                        {load.status === 'pending' 
-                          ? 'Pending' 
-                          : load.status === 'assigned' 
-                            ? 'Assigned' 
-                            : 'Completed'}
-                      </span>
-                    </p>
-                    {load.status === 'assigned' && load.assignedDriver && (
-                      <div className="mt-2 p-3 bg-amber-50 rounded-md">
-                        <p className="font-medium text-amber-800">Assigned Driver</p>
-                        <p className="text-sm"><span className="font-medium">Name:</span> {load.assignedDriver.name}</p>
-                        <p className="text-sm"><span className="font-medium">Phone:</span> {load.assignedDriver.mobile}</p>
-                        <p className="text-sm"><span className="font-medium">Lorry Type:</span> {load.assignedDriver.lorryType}</p>
-                        <p className="text-sm"><span className="font-medium">Capacity:</span> {load.assignedDriver.maxCapacity} tons</p>
+                  {/* Show edit form if this load is being edited */}
+                  {editingLoadId === load.id ? (
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-semibold text-amber-800 mb-4">{t('customer.editLoad')}</h3>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.source')}</label>
+                        <input
+                          type="text"
+                          value={editFormData.source}
+                          onChange={(e) => setEditFormData({ ...editFormData, source: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
                       </div>
-                    )}
-                  </div>
-                  <div className="mt-4 flex flex-col space-y-2">
-                    {load.status === 'pending' && (
-                      <button
-                        onClick={() => toggleApplicants(load.id)}
-                        className="w-full bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 flex justify-center items-center"
-                      >
-                        {load.showApplicants ? (
-                          <>
-                            <ChevronUp className="w-4 h-4 mr-2" />
-                            Hide Driver Applicants
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="w-4 h-4 mr-2" />
-                            View Driver Applicants
-                          </>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.destination')}</label>
+                        <input
+                          type="text"
+                          value={editFormData.destination}
+                          onChange={(e) => setEditFormData({ ...editFormData, destination: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.loadType')}</label>
+                        <input
+                          type="text"
+                          value={editFormData.loadType}
+                          onChange={(e) => setEditFormData({ ...editFormData, loadType: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.quantity')}</label>
+                        <input
+                          type="number"
+                          value={editFormData.quantity}
+                          onChange={(e) => setEditFormData({ ...editFormData, quantity: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.estimatedFare')} (₹)</label>
+                        <input
+                          type="number"
+                          value={editFormData.estimatedFare}
+                          onChange={(e) => setEditFormData({ ...editFormData, estimatedFare: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('customer.description')}</label>
+                        <textarea
+                          value={editFormData.description}
+                          onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                          rows={3}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                        />
+                      </div>
+                      <div className="flex space-x-2 mt-4">
+                        <button
+                          onClick={() => handleUpdateLoad(load.id)}
+                          disabled={isLoading}
+                          className="flex-1 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+                        >
+                          {t('common.save')}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={isLoading}
+                          className="flex-1 bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 disabled:opacity-50"
+                        >
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold text-amber-800 mb-4 pr-16">
+                        {load.source} - {load.destination}
+                      </h3>
+                      <div className="space-y-2">
+                        <p><span className="font-medium">{t('customer.loadType')}:</span> {load.loadType}</p>
+                        <p><span className="font-medium">{t('customer.quantity')}:</span> {load.quantity}</p>
+                        <p><span className="font-medium">{t('customer.estimatedFare')}:</span> ₹{load.estimatedFare}</p>
+                        <p>
+                          <span className="font-medium">{t('customer.status')}:</span>{' '}
+                          <span className={`${
+                            load.status === 'pending' 
+                              ? 'text-orange-600' 
+                              : load.status === 'assigned' 
+                                ? 'text-green-600' 
+                                : 'text-blue-600'
+                          } font-medium`}>
+                            {load.status === 'pending' 
+                              ? t('customer.pending')
+                              : load.status === 'assigned' 
+                                ? t('customer.assigned')
+                                : t('customer.completed')}
+                          </span>
+                        </p>
+                        {load.status === 'assigned' && load.assignedDriver && (
+                          <div className="mt-2 p-3 bg-amber-50 rounded-md">
+                            <p className="font-medium text-amber-800">{t('customer.driverDetails')}</p>
+                            <p className="text-sm"><span className="font-medium">{t('auth.name')}:</span> {load.assignedDriver.name}</p>
+                            <p className="text-sm"><span className="font-medium">{t('auth.phone')}:</span> {load.assignedDriver.mobile}</p>
+                            <p className="text-sm"><span className="font-medium">{t('driver.lorryType')}:</span> {load.assignedDriver.lorryType}</p>
+                            <p className="text-sm"><span className="font-medium">{t('driver.maxCapacity')}:</span> {load.assignedDriver.maxCapacity} tons</p>
+                            {/* Show driver's average rating */}
+                            {load.assignedDriver.averageRating && load.assignedDriver.averageRating > 0 && (
+                              <p className="text-sm flex items-center mt-1">
+                                <span className="font-medium">{t('rating.averageRating')}:</span>
+                                <span className="ml-1 flex items-center text-yellow-600">
+                                  {load.assignedDriver.averageRating.toFixed(1)}
+                                  <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-gray-600 ml-1">({load.assignedDriver.totalRatings || 0})</span>
+                                </span>
+                              </p>
+                            )}
+                          </div>
                         )}
-                      </button>
-                    )}
-                    {load.status === 'assigned' && (
-                  <button
-                    onClick={() => handleCompleteLoad(load.id)}
-                        className="w-full bg-amber-600 text-white py-2 rounded-md hover:bg-amber-700 flex justify-center items-center"
-                  >
-                        Mark as Completed
-                  </button>
-                    )}
-                  </div>
-                  {load.status === 'pending' && renderApplicants(load)}
+                      </div>
+                      <div className="mt-4 flex flex-col space-y-2">
+                        {load.status === 'pending' && (
+                          <button
+                            onClick={() => toggleApplicants(load.id)}
+                            className="w-full bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 flex justify-center items-center"
+                          >
+                            {load.showApplicants ? (
+                              <>
+                                <ChevronUp className="w-4 h-4 mr-2" />
+                                {t('customer.hideApplicants')}
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-4 h-4 mr-2" />
+                                {t('customer.viewApplicants')}
+                              </>
+                            )}
+                          </button>
+                        )}
+                        {load.status === 'assigned' && (
+                          <button
+                            onClick={() => handleCompleteLoad(load.id)}
+                            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex justify-center items-center"
+                          >
+                            {t('messages.markAsCompleted')}
+                          </button>
+                        )}
+                      </div>
+                      {load.status === 'pending' && renderApplicants(load)}
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -892,22 +1188,85 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
               {getCompletedLoads().map((load) => (
                 <div key={load.id} className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold text-amber-800 mb-4">
-                    {load.source} → {load.destination}
+                    {load.source} - {load.destination}
                   </h3>
                   <div className="space-y-2">
-                    <p><span className="font-medium">Load Type:</span> {load.loadType}</p>
-                    <p><span className="font-medium">Quantity:</span> {load.quantity}</p>
-                    <p><span className="font-medium">Estimated Fare:</span> ₹{load.estimatedFare}</p>
-                    <p><span className="font-medium">Status:</span> {load.status}</p>
-                    <p><span className="font-medium">Completed At:</span> {new Date(load.completedAt || '').toLocaleString()}</p>
+                    <p><span className="font-medium">{t('customer.loadType')}:</span> {load.loadType}</p>
+                    <p><span className="font-medium">{t('customer.quantity')}:</span> {load.quantity}</p>
+                    <p><span className="font-medium">{t('customer.estimatedFare')}:</span> ₹{load.estimatedFare}</p>
+                    <p><span className="font-medium">{t('customer.status')}:</span> {t('customer.completed')}</p>
+                    <p><span className="font-medium">{t('customer.completedAt')}:</span> {new Date(load.completedAt || '').toLocaleString()}</p>
+                    {load.assignedDriver && (
+                      <div className="mt-3 p-3 bg-amber-50 rounded-md">
+                        <p className="font-medium text-amber-800">{t('customer.driverDetails')}</p>
+                        <p className="text-sm"><span className="font-medium">{t('auth.name')}:</span> {load.assignedDriver.name}</p>
+                        <p className="text-sm"><span className="font-medium">{t('auth.phone')}:</span> {load.assignedDriver.mobile}</p>
+                        {/* Show driver's average rating */}
+                        {load.assignedDriver.averageRating && load.assignedDriver.averageRating > 0 && (
+                          <p className="text-sm flex items-center mt-1">
+                            <span className="font-medium">{t('rating.averageRating')}:</span>
+                            <span className="ml-1 flex items-center text-yellow-600">
+                              {load.assignedDriver.averageRating.toFixed(1)}
+                              <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400" />
+                              <span className="text-gray-600 ml-1">({load.assignedDriver.totalRatings || 0})</span>
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
+                  {load.assignedDriver && (
+                    load.customerRated ? (
+                      <button
+                        onClick={() => openRatingModal(load)}
+                        className="mt-4 w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex justify-center items-center"
+                      >
+                        <Star className="w-4 h-4 mr-2 fill-current" />
+                        {t('rating.ratingGiven')}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => openRatingModal(load)}
+                        className="mt-4 w-full bg-orange-600 text-white py-2 rounded-md hover:bg-orange-700 flex justify-center items-center"
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        {t('rating.rateDriver')}
+                      </button>
+                    )
+                  )}
                 </div>
               ))}
             </div>
           )}
+
+          {/* Analytics Tab */}
+          {!isLoading && activeTab === 'analytics' && (
+            <CustomerAnalytics />
+          )}
+
+          {/* Profile Tab */}
+          {!isLoading && activeTab === 'profile' && (
+            <ProfileManagement currentUser={currentUser} userRole="customer" />
+          )}
         </div>
+        
+        {/* Rating Modal */}
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          loadId={ratingLoadId}
+          targetId={ratingDriverId}
+          targetName={ratingDriverName}
+          type="driver"
+          onSuccess={handleRatingSuccess}
+        />
       </div>
     );
   };
 
   export default CustomerDashboard;
+
+

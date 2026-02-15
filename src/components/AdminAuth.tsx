@@ -3,6 +3,8 @@ import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { User } from '../types';
+import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../config';
 
 interface AdminAuthProps {
   onSuccess: (user: User) => void;
@@ -10,6 +12,7 @@ interface AdminAuthProps {
 }
 
 const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
     
     try {
       // Login API call
-      const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
         email: formData.email,
         password: formData.password
       });
@@ -71,7 +74,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
           <div className="text-center">
             <ShieldAlert className="h-12 w-12 text-red-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Admin Access Only
+              {t('auth.adminLogin')}
             </h2>
             <p className="text-gray-600 mb-6">
               This area is restricted to authorized administrators.
@@ -86,7 +89,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">{t('auth.email')}</label>
               <input
                 type="email"
                 required
@@ -97,7 +100,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
               <input
                 type="password"
                 required
@@ -105,6 +108,22 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+            </div>
+
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!formData.email) {
+                    setError('Please enter your email first');
+                    return;
+                  }
+                  navigate(`/forgot-password?type=admin&email=${encodeURIComponent(formData.email)}`);
+                }}
+                className="text-sm font-medium text-orange-600 hover:text-orange-700"
+              >
+                {t('auth.forgotPassword')}
+              </button>
             </div>
 
             <div>
@@ -116,10 +135,10 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
                 {isLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Logging in...
+                    {t('common.loading')}
                   </div>
                 ) : (
-                  'Login'
+                  t('common.login')
                 )}
               </button>
             </div>
@@ -131,3 +150,5 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onSuccess, onBack }) => {
 };
 
 export default AdminAuth; 
+
+

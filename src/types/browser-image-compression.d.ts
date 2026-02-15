@@ -15,3 +15,4 @@ declare module 'browser-image-compression' {
     options: Options
   ): Promise<File>;
 } 
+

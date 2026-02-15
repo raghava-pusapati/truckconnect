@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 import { authAPI } from '../api';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 interface DriverAuthProps {
   onSuccess: (user: User) => void;
@@ -41,6 +42,7 @@ const validatePassword = (password: string): { isValid: boolean; message: string
 };
 
 const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -338,13 +340,13 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
+            {t('common.back')}
           </button>
         </div>
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              {isLogin ? 'Driver Login' : 'Driver Registration'}
+              {isLogin ? t('auth.driverLogin') : t('auth.driverRegister')}
             </h2>
           </div>
 
@@ -473,7 +475,7 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
               <h3 className={!isLogin ? "text-lg font-medium text-gray-900 mb-3" : "sr-only"}>Account Information</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className={isLogin ? "" : "col-span-1"}>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('auth.email')}</label>
                   <input
                     type="email"
                     required
@@ -484,7 +486,7 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
                 </div>
 
                 <div className={isLogin ? "" : "col-span-1"}>
-                  <label className="block text-sm font-medium text-gray-700">Password</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
                   <input
                     type="password"
                     required
@@ -496,6 +498,24 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
               </div>
             </div>
 
+            {isLogin && (
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formData.email) {
+                      setError('Please enter your email first');
+                      return;
+                    }
+                    navigate(`/forgot-password?type=driver&email=${encodeURIComponent(formData.email)}`);
+                  }}
+                  className="text-sm font-medium text-orange-600 hover:text-orange-700"
+                >
+                  {t('auth.forgotPassword')}
+                </button>
+              </div>
+            )}
+
             <div>
               <button
                 type="submit"
@@ -505,10 +525,10 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
                 {isLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    {isLogin ? 'Logging in...' : 'Registering...'}
+                    {isLogin ? t('common.loading') : t('common.loading')}
                   </div>
                 ) : (
-                  isLogin ? 'Login' : 'Register'
+                  isLogin ? t('common.login') : t('common.register')
                 )}
               </button>
             </div>
@@ -541,7 +561,7 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
               }}
               className="text-sm text-orange-600 hover:text-orange-500"
             >
-              {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+              {isLogin ? t('auth.noAccount') : t('auth.haveAccount')}
             </button>
           </div>
         </div>
@@ -551,3 +571,4 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
 };
 
 export default DriverAuth;
+

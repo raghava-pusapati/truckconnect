@@ -183,9 +183,22 @@ router.post('/driver/register', upload.fields([
       maxCapacity
     } = req.body;
 
-    console.log('Driver registration attempt');
+    console.log('=== DRIVER REGISTRATION START ===');
     console.log('Received data:', { name, email, phone, address, lorryType, maxCapacity, hasPassword: !!password });
     console.log('Received files:', req.files ? Object.keys(req.files) : 'No files');
+    
+    // Log file details
+    if (req.files) {
+      Object.keys(req.files).forEach(key => {
+        const file = req.files[key][0];
+        console.log(`File ${key}:`, {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: file.path ? 'Uploaded to Cloudinary' : 'No path'
+        });
+      });
+    }
 
     // Validate required fields
     if (!name || !email || !password || !phone || !address || !lorryType || !maxCapacity) {
@@ -219,15 +232,29 @@ router.post('/driver/register', upload.fields([
       return res.status(409).json({ msg: 'Driver already exists with this email' });
     }
 
-    // Extract Cloudinary URLs from uploaded files
+    // Extract Cloudinary URLs from uploaded files and format for model
     const documents = {
-      license: req.files.license ? req.files.license[0].path : null,
-      rc: req.files.rc ? req.files.rc[0].path : null,
-      fitness: req.files.fitness ? req.files.fitness[0].path : null,
-      insurance: req.files.insurance ? req.files.insurance[0].path : null,
-      medical: req.files.medical ? req.files.medical[0].path : null,
-      allIndiaPermit: req.files.allIndiaPermit ? req.files.allIndiaPermit[0].path : null
+      license: {
+        url: req.files.license ? req.files.license[0].path : null
+      },
+      rc: {
+        url: req.files.rc ? req.files.rc[0].path : null
+      },
+      fitness: {
+        url: req.files.fitness ? req.files.fitness[0].path : null
+      },
+      insurance: {
+        url: req.files.insurance ? req.files.insurance[0].path : null
+      },
+      medical: {
+        url: req.files.medical ? req.files.medical[0].path : null
+      },
+      allIndiaPermit: {
+        url: req.files.allIndiaPermit ? req.files.allIndiaPermit[0].path : null
+      }
     };
+
+    console.log('Document URLs:', documents);
 
     // Create new driver with Cloudinary URLs
     console.log('Creating new driver document...');
@@ -246,12 +273,23 @@ router.post('/driver/register', upload.fields([
     // Save to database
     console.log('Saving to database...');
     await newDriver.save();
-    console.log(`Driver registration successful with documents: ${email}`);
+    console.log(`✅ Driver registration successful: ${email}`);
+    console.log('=== DRIVER REGISTRATION END ===');
     
     res.status(201).json({ msg: 'Driver registered successfully. Your account is pending admin approval.' });
   } catch (err) {
-    console.error('Driver registration error:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    console.error('❌ Driver registration error:', err);
+    console.error('Error stack:', err.stack);
+    
+    // Send more specific error messages
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ msg: 'Validation error', error: err.message });
+    }
+    if (err.code === 11000) {
+      return res.status(409).json({ msg: 'Driver with this email already exists' });
+    }
+    
+    res.status(500).json({ msg: 'Server error during registration', error: err.message });
   }
 });
 

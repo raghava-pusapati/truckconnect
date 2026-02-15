@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Load, User } from '../types';
-import { ArrowLeft, Truck, ClipboardList, CheckSquare } from 'lucide-react';
+import { ArrowLeft, Truck, ClipboardList, CheckSquare, BarChart3, Star, User as UserIcon } from 'lucide-react';
 import { loadAPI } from '../api';
+import DriverAnalytics from './DriverAnalytics';
+import RatingModal from './RatingModal';
+import ProfileManagement from './ProfileManagement';
+import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 
 interface DriverDashboardProps {
   currentUser: User;
@@ -10,7 +16,8 @@ interface DriverDashboardProps {
 }
 
 const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'available' | 'applied' | 'completed'>('available');
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'available' | 'applied' | 'completed' | 'analytics'>('available');
   const [searchCriteria, setSearchCriteria] = useState({
     source: '',
     destination: ''
@@ -22,6 +29,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
   const [error, setError] = useState<string | null>(null);
   const [appliedLoadIds, setAppliedLoadIds] = useState<Set<string>>(new Set());
   const [hasAssignedLoad, setHasAssignedLoad] = useState<boolean>(false);
+  
+  // Rating modal state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingLoadId, setRatingLoadId] = useState<string>('');
+  const [ratingCustomerId, setRatingCustomerId] = useState<string>('');
+  const [ratingCustomerName, setRatingCustomerName] = useState<string>('');
 
   // Initial data loading
   useEffect(() => {
@@ -178,7 +191,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
 
       // Also fetch loads the driver has applied for but not yet been assigned
       try {
-        const appliedResponse = await fetch('https://truckconnect-backend.onrender.com/api/loads/applications', {
+        const appliedResponse = await fetch(`${API_BASE_URL}/loads/applications`, {
           headers: {
             'x-auth-token': localStorage.getItem('token') || ''
           }
@@ -273,12 +286,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
 
   const applyForLoad = async (load: Load) => {
     if (hasAssignedLoad) {
-      alert('You have already been assigned a load. Complete it before applying for another.');
+      toast.error('You have already been assigned a load. Complete it before applying for another.');
       return;
     }
 
     if (currentUser.role === 'driver' && load.quantity > (currentUser as any).maxCapacity) {
-      alert('Your vehicle cannot handle this load. Please apply for a smaller load.');
+      toast.error('Your vehicle cannot handle this load. Please apply for a smaller load.');
       return;
     }
 
@@ -293,10 +306,10 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
       fetchAvailableLoads();
       fetchAssignedLoads();
       
-      alert('Applied successfully!');
+      toast.success('Applied successfully!');
     } catch (error: any) {
       console.error('Error applying for load:', error);
-      alert(error.message || 'Failed to apply for load. Please try again.');
+      toast.error(error.message || 'Failed to apply for load. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -310,13 +323,28 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
       // Refresh the load lists
       fetchAssignedLoads();
       
-      alert('Load marked as completed!');
+      toast.success('Load marked as completed!');
     } catch (error: any) {
       console.error('Error completing load:', error);
-      alert(error.message || 'Failed to complete load. Please try again.');
+      toast.error(error.message || 'Failed to complete load. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const openRatingModal = (load: Load) => {
+    if (load.customerDetails || load.customerId) {
+      setRatingLoadId(load.id);
+      setRatingCustomerId(load.customerDetails?.id || load.customerId || '');
+      setRatingCustomerName(load.customerDetails?.name || load.customerName || 'Customer');
+      setShowRatingModal(true);
+    }
+  };
+
+  const handleRatingSuccess = async () => {
+    setShowRatingModal(false);
+    await fetchAssignedLoads(); // Refresh loads to update rating status
+    toast.success(t('rating.ratingSuccess'));
   };
 
   // Check if driver is rejected
@@ -387,7 +415,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
             }`}
           >
             <Truck className="h-5 w-5 mr-2" />
-            Available Loads
+            {t('driver.availableLoads')}
           </button>
           <button
             onClick={() => setActiveTab('applied')}
@@ -398,7 +426,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
             }`}
           >
             <ClipboardList className="h-5 w-5 mr-2" />
-            Assigned Loads
+            {t('driver.appliedLoads')}
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -409,7 +437,29 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
             }`}
           >
             <CheckSquare className="h-5 w-5 mr-2" />
-            Completed Loads
+            {t('driver.completedLoads')}
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`flex items-center px-4 py-2 rounded-md ${
+              activeTab === 'analytics'
+                ? 'bg-amber-700 text-white'
+                : 'bg-white text-amber-800 hover:bg-amber-100'
+            }`}
+          >
+            <BarChart3 className="h-5 w-5 mr-2" />
+            {t('driver.analytics')}
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex items-center px-4 py-2 rounded-md ${
+              activeTab === 'profile'
+                ? 'bg-amber-700 text-white'
+                : 'bg-white text-amber-800 hover:bg-amber-100'
+            }`}
+          >
+            <UserIcon className="h-5 w-5 mr-2" />
+            {t('profile.title')}
           </button>
         </div>
       </div>
@@ -429,11 +479,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
       {!isLoading && activeTab === 'available' && (
         <>
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-amber-200">
-            <h2 className="text-2xl font-bold mb-6 text-amber-800">Search for Loads</h2>
+            <h2 className="text-2xl font-bold mb-6 text-amber-800">{t('driver.availableLoads')}</h2>
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-amber-800">Source Location</label>
+                  <label className="block text-sm font-medium text-amber-800">{t('customer.source')}</label>
                   <input
                     type="text"
                     className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
@@ -443,7 +493,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-amber-800">Destination Location</label>
+                  <label className="block text-sm font-medium text-amber-800">{t('customer.destination')}</label>
                   <input
                     type="text"
                     className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
@@ -459,13 +509,13 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                   onClick={() => setSearchCriteria({ source: '', destination: '' })}
                   className="px-4 py-2 mr-2 bg-amber-100 text-amber-800 rounded-md hover:bg-amber-200"
                 >
-                  Clear
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-amber-700 text-white rounded-md hover:bg-amber-800"
                 >
-                  Search
+                  {t('common.submit')}
                 </button>
               </div>
             </form>
@@ -482,13 +532,13 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="text-lg font-semibold mb-2 text-amber-800">
-                        {load.source} → {load.destination}
+                        {load.source} - {load.destination}
                       </h4>
                       <div className="grid grid-cols-2 gap-4 text-sm text-amber-900">
-                        <p>Load Type: {load.loadType}</p>
-                        <p>Quantity: {load.quantity} tons</p>
-                        <p>Estimated Fare: ₹{load.estimatedFare}</p>
-                        <p>Posted: {new Date(load.createdAt).toLocaleDateString()}</p>
+                        <p>{t('customer.loadType')}: {load.loadType}</p>
+                        <p>{t('customer.quantity')}: {load.quantity} tons</p>
+                        <p>{t('customer.estimatedFare')}: ₹{load.estimatedFare}</p>
+                        <p>{t('customer.createdAt')}: {new Date(load.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <button
@@ -505,8 +555,8 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                       {hasAssignedLoad 
                         ? 'Complete Current Load First' 
                         : hasAppliedForLoad(load.id) 
-                          ? 'Applied' 
-                          : 'Apply'}
+                          ? t('driver.applied')
+                          : t('driver.apply')}
                     </button>
                   </div>
                 </div>
@@ -528,21 +578,32 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="text-lg font-semibold mb-2 text-amber-800">
-                      {load.source} → {load.destination}
+                      {load.source} - {load.destination}
                     </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm text-amber-900">
-                      <p>Load Type: {load.loadType}</p>
-                      <p>Quantity: {load.quantity} tons</p>
-                      <p>Estimated Fare: ₹{load.estimatedFare}</p>
-                      <p>Status: Assigned to you</p>
+                      <p>{t('customer.loadType')}: {load.loadType}</p>
+                      <p>{t('customer.quantity')}: {load.quantity} tons</p>
+                      <p>{t('customer.estimatedFare')}: ₹{load.estimatedFare}</p>
+                      <p>{t('customer.status')}: {t('customer.assigned')}</p>
                     </div>
                     
                     {/* Customer details section */}
                     <div className="mt-4 p-3 bg-amber-100 rounded-md">
-                      <h5 className="font-semibold text-amber-800 mb-1">Customer Details:</h5>
+                      <h5 className="font-semibold text-amber-800 mb-1">{t('driver.customerDetails')}:</h5>
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <p><span className="font-medium">Name:</span> {load.customerDetails?.name || load.customerName || 'Not provided'}</p>
-                        <p><span className="font-medium">Phone:</span> {load.customerDetails?.phone || load.customerPhone || 'Not provided'}</p>
+                        <p><span className="font-medium">{t('auth.name')}:</span> {load.customerDetails?.name || load.customerName || 'Not provided'}</p>
+                        <p><span className="font-medium">{t('auth.phone')}:</span> {load.customerDetails?.phone || load.customerPhone || 'Not provided'}</p>
+                        {/* Show customer's average rating */}
+                        {load.customerDetails?.averageRating && load.customerDetails.averageRating > 0 && (
+                          <p className="flex items-center">
+                            <span className="font-medium">{t('rating.averageRating')}:</span>
+                            <span className="ml-1 flex items-center text-yellow-600">
+                              {load.customerDetails.averageRating.toFixed(1)}
+                              <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400" />
+                              <span className="text-gray-600 ml-1">({load.customerDetails.totalRatings || 0})</span>
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -566,34 +627,86 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
             completedLoads.map(load => (
               <div key={load.id} className="bg-yellow-50 rounded-lg shadow-lg p-6 border border-yellow-200">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-grow">
                     <h4 className="text-lg font-semibold mb-2 text-amber-800">
-                      {load.source} → {load.destination}
+                      {load.source} - {load.destination}
                     </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm text-amber-900">
-                      <p>Load Type: {load.loadType}</p>
-                      <p>Quantity: {load.quantity} tons</p>
-                      <p>Estimated Fare: ₹{load.estimatedFare}</p>
-                      <p>Completed: {new Date(load.completedAt || '').toLocaleDateString()}</p>
+                      <p>{t('customer.loadType')}: {load.loadType}</p>
+                      <p>{t('customer.quantity')}: {load.quantity} tons</p>
+                      <p>{t('customer.estimatedFare')}: ₹{load.estimatedFare}</p>
+                      <p>{t('customer.completedAt')}: {new Date(load.completedAt || '').toLocaleDateString()}</p>
                     </div>
                     
                     {/* Customer details section */}
                     <div className="mt-4 p-3 bg-amber-100 rounded-md">
-                      <h5 className="font-semibold text-amber-800 mb-1">Customer Details:</h5>
+                      <h5 className="font-semibold text-amber-800 mb-1">{t('driver.customerDetails')}:</h5>
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <p><span className="font-medium">Name:</span> {load.customerDetails?.name || load.customerName || 'Not provided'}</p>
-                        <p><span className="font-medium">Phone:</span> {load.customerDetails?.phone || load.customerPhone || 'Not provided'}</p>
+                        <p><span className="font-medium">{t('auth.name')}:</span> {load.customerDetails?.name || load.customerName || 'Not provided'}</p>
+                        <p><span className="font-medium">{t('auth.phone')}:</span> {load.customerDetails?.phone || load.customerPhone || 'Not provided'}</p>
+                        {/* Show customer's average rating */}
+                        {load.customerDetails?.averageRating && load.customerDetails.averageRating > 0 && (
+                          <p className="flex items-center">
+                            <span className="font-medium">{t('rating.averageRating')}:</span>
+                            <span className="ml-1 flex items-center text-yellow-600">
+                              {load.customerDetails.averageRating.toFixed(1)}
+                              <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400" />
+                              <span className="text-gray-600 ml-1">({load.customerDetails.totalRatings || 0})</span>
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
+                {load.driverRated ? (
+                  <button
+                    onClick={() => openRatingModal(load)}
+                    className="mt-4 w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex justify-center items-center"
+                  >
+                    <Star className="w-4 h-4 mr-2 fill-current" />
+                    {t('rating.ratingGiven')}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openRatingModal(load)}
+                    className="mt-4 w-full bg-orange-600 text-white py-2 rounded-md hover:bg-orange-700 flex justify-center items-center"
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    {t('rating.rateCustomer')}
+                  </button>
+                )}
               </div>
             ))
           )}
         </div>
       )}
+
+      {!isLoading && activeTab === 'analytics' && (
+        <DriverAnalytics />
+      )}
+
+      {!isLoading && activeTab === 'profile' && (
+        <ProfileManagement currentUser={currentUser} userRole="driver" />
+      )}
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        loadId={ratingLoadId}
+        targetId={ratingCustomerId}
+        targetName={ratingCustomerName}
+        type="customer"
+        onSuccess={handleRatingSuccess}
+      />
     </div>
   );
 };
 
 export default DriverDashboard;
+
+

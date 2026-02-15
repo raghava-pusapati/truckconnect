@@ -48,6 +48,8 @@ export interface Load {
   status: 'pending' | 'assigned' | 'completed' | 'cancelled';
   createdAt: string;
   completedAt?: string;
+  driverRated?: boolean;
+  customerRated?: boolean;
   customer?: {
     id: string;
     name: string;
@@ -59,6 +61,8 @@ export interface Load {
     name: string;
     phone: string;
     email: string;
+    averageRating?: number;
+    totalRatings?: number;
   };
   customerName?: string;
   customerPhone?: string;
@@ -70,6 +74,8 @@ export interface Load {
     lorryType: string;
     maxCapacity: number;
     appliedAt: string;
+    averageRating?: number;
+    totalRatings?: number;
   }>;
   assignedDriver?: {
     driverId: string;
@@ -78,6 +84,8 @@ export interface Load {
     lorryType: string;
     maxCapacity: number;
     assignedAt: string;
+    averageRating?: number;
+    totalRatings?: number;
   };
 }
 
@@ -85,7 +93,13 @@ export interface DriverApplicant {
   driverId: string;
   name: string;
   phone: string;
+  mobile?: string;
   status: string;
+  lorryType?: string;
+  maxCapacity?: string | number;
+  appliedAt?: string;
+  averageRating?: number;
+  totalRatings?: number;
   bid?: number;
   documents?: {
     license?: string;
@@ -96,4 +110,6 @@ export interface DriverApplicant {
     allIndiaPermit?: string;
   };
 } 
+
+
 

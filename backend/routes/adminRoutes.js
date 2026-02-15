@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Driver = require('../models/Driver');
 const { authMiddleware } = require('../middleware/authMiddleware');
+const { createNotification } = require('./notificationRoutes');
+const emailService = require('../services/emailNotificationService');
 
 // Middleware to check if user is an admin
 const authorizeAdmin = (req, res, next) => {
@@ -72,6 +74,24 @@ router.put('/drivers/:id/accept', async (req, res) => {
       return res.status(404).json({ message: 'Driver not found' });
     }
     
+    // 🔔 SEND NOTIFICATIONS TO DRIVER
+    try {
+      await createNotification(
+        driver._id,
+        'driver_approved',
+        'Application Approved!',
+        'Congratulations! Your driver application has been approved. You can now start applying for loads.',
+        null
+      );
+      
+      await emailService.sendDriverApprovedEmail(
+        driver.email,
+        driver.name
+      );
+    } catch (notifError) {
+      console.error('Error sending approval notification:', notifError);
+    }
+    
     res.json(driver);
   } catch (error) {
     console.error('Error accepting driver:', error);
@@ -99,6 +119,25 @@ router.put('/drivers/:id/reject', async (req, res) => {
     
     if (!driver) {
       return res.status(404).json({ message: 'Driver not found' });
+    }
+    
+    // 🔔 SEND NOTIFICATIONS TO DRIVER
+    try {
+      await createNotification(
+        driver._id,
+        'driver_rejected',
+        'Application Status Update',
+        `Your driver application has been reviewed. Reason: ${rejectionReason}`,
+        null
+      );
+      
+      await emailService.sendDriverRejectedEmail(
+        driver.email,
+        driver.name,
+        rejectionReason
+      );
+    } catch (notifError) {
+      console.error('Error sending rejection notification:', notifError);
     }
     
     res.json(driver);

@@ -3,6 +3,8 @@ import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
+import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../config';
 
 // Add validation functions
 const validateEmail = (email: string): boolean => {
@@ -40,6 +42,7 @@ interface CustomerAuthProps {
 }
 
 const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +82,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
     try {
       if (isLogin) {
         // Login API call
-        const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/login', {
+        const response = await axios.post(`${API_BASE_URL}/auth/login`, {
           email: formData.email,
           password: formData.password
         });
@@ -99,7 +102,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
         }
       } else {
         // Registration API call
-        const response = await axios.post('https://truckconnect-backend.onrender.com/api/auth/register', {
+        const response = await axios.post(`${API_BASE_URL}/auth/register`, {
           name: formData.name,
           email: formData.email,
           password: formData.password,
@@ -146,13 +149,13 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             className="inline-flex items-center text-amber-800 hover:text-amber-900 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
+            {t('common.back')}
           </button>
         </div>
         <div className="bg-white/80 backdrop-blur rounded-2xl shadow-2xl border border-amber-100 p-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-amber-950 mb-8 tracking-tight">
-              {isLogin ? 'Customer Login' : 'Customer Registration'}
+              {isLogin ? t('auth.customerLogin') : t('auth.customerRegister')}
             </h2>
           </div>
 
@@ -165,7 +168,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-amber-900">Name</label>
+                <label className="block text-sm font-medium text-amber-900">{t('auth.name')}</label>
                 <input
                   type="text"
                   required
@@ -177,7 +180,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-amber-900">Email</label>
+              <label className="block text-sm font-medium text-amber-900">{t('auth.email')}</label>
               <input
                 type="email"
                 required
@@ -189,7 +192,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-amber-900">Mobile Number</label>
+                <label className="block text-sm font-medium text-amber-900">{t('auth.phone')}</label>
                 <input
                   type="tel"
                   required
@@ -201,7 +204,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-amber-900">Password</label>
+              <label className="block text-sm font-medium text-amber-900">{t('auth.password')}</label>
               <input
                 type="password"
                 required
@@ -210,6 +213,24 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </div>
+
+            {isLogin && (
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formData.email) {
+                      setError('Please enter your email first');
+                      return;
+                    }
+                    navigate(`/forgot-password?type=customer&email=${encodeURIComponent(formData.email)}`);
+                  }}
+                  className="text-sm font-medium text-orange-600 hover:text-orange-700"
+                >
+                  {t('auth.forgotPassword')}
+                </button>
+              </div>
+            )}
 
             <div>
               <button
@@ -220,10 +241,10 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
                 {isLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white mr-2"></div>
-                    {isLogin ? 'Logging in...' : 'Registering...'}
+                    {isLogin ? t('common.loading') : t('common.loading')}
                   </div>
                 ) : (
-                  isLogin ? 'Login' : 'Register'
+                  isLogin ? t('common.login') : t('common.register')
                 )}
               </button>
             </div>
@@ -243,7 +264,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
               }}
               className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
             >
-              {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+              {isLogin ? t('auth.noAccount') : t('auth.haveAccount')}
             </button>
           </div>
         </div>
@@ -253,3 +274,8 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
 };
 
 export default CustomerAuth;
+
+
+
+
+

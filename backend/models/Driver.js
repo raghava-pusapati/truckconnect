@@ -40,16 +40,48 @@ const driverSchema = new mongoose.Schema({
     type: String
   },
   documents: {
-    license: { type: String },
-    rc: { type: String },
-    fitness: { type: String },
-    insurance: { type: String },
-    allIndiaPermit: { type: String },
-    medical: { type: String }
+    license: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    },
+    rc: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    },
+    fitness: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    },
+    insurance: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    },
+    allIndiaPermit: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    },
+    medical: { 
+      url: { type: String },
+      expiryDate: { type: Date }
+    }
   },
   role: {
     type: String,
     default: 'driver'
+  },
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  totalRatings: {
+    type: Number,
+    default: 0
+  },
+  profilePicture: {
+    type: String,
+    default: ''
   },
   createdAt: {
     type: Date,

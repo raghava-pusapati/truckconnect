@@ -15,20 +15,76 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/password-reset', require('./routes/passwordResetRoutes'));
 app.use('/api/customer', require('./routes/customerRoutes'));
 app.use('/api/driver', require('./routes/driverRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/loads', require('./routes/loadRoutes'));
+app.use('/api/ratings', require('./routes/ratingRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/profile', require('./routes/profileRoutes'));
 
 // Test route
 app.get('/api/test', (req, res) => {
   res.send('API is running...');
 });
 
+// Debug route to check users
+app.get('/api/debug/users', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const Driver = require('./models/Driver');
+    
+    const customers = await User.find({ role: 'customer' }).select('email name role');
+    const admins = await User.find({ role: 'admin' }).select('email name role');
+    const drivers = await Driver.find().select('email name');
+    
+    res.json({
+      customers: customers.length,
+      admins: admins.length,
+      drivers: drivers.length,
+      customerEmails: customers.map(u => u.email),
+      adminEmails: admins.map(u => u.email),
+      driverEmails: drivers.map(d => d.email)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Default error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('Error caught by error handler:', err);
+  
+  // Handle Multer errors
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        msg: 'File too large. Maximum file size is 5MB per document.' 
+      });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ 
+        msg: 'Too many files uploaded.' 
+      });
+    }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({ 
+        msg: 'Unexpected file field. Please check your form.' 
+      });
+    }
+    return res.status(400).json({ 
+      msg: 'File upload error', 
+      error: err.message 
+    });
+  }
+  
+  // Handle other errors
+  res.status(err.status || 500).json({ 
+    msg: err.message || 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 // Start server

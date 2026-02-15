@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Applicants API</title>
+</head>
+<body>
+    <h1>Test Applicants API</h1>
+    <button onclick="testAPI()">Test API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('result').textContent = 'ERROR: No token found. Please login first.';
+                return;
+            }
+
+            const loadId = '6856af462f11641e835e4a01'; // Load with PUSAPATI RAGHAVENDRA
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/loads/${loadId}/applicants`, {
+                    headers: {
+                        'x-auth-token': token
+                    }
+                });
+
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                
+                console.log('API Response:', data);
+                if (data.length > 0) {
+                    console.log('First applicant averageRating:', data[0].averageRating);
+                    console.log('First applicant totalRatings:', data[0].totalRatings);
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = 'ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

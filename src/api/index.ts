@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { User, Driver } from '../types';
-
-// Base URL for API calls
-const API_BASE_URL = 'https://truckconnect-backend.onrender.com/api';
+import { API_BASE_URL, API_URL } from '../config';
 
 // Configure axios with base URL
 const api = axios.create({
@@ -14,7 +12,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['x-auth-token'] = token;
     }
     // Only set Content-Type to JSON if it's not already set (e.g., for FormData)
     if (!config.headers['Content-Type']) {
@@ -243,7 +241,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch('https://truckconnect-backend.onrender.com/api/loads', {
+    const response = await fetch(`${API_BASE_URL}/loads`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -264,7 +262,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch('https://truckconnect-backend.onrender.com/api/loads', {
+    const response = await fetch(`${API_BASE_URL}/loads`, {
       headers: {
         'x-auth-token': token
       }
@@ -282,7 +280,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}`, {
+    const response = await fetch(`${API_BASE_URL}/loads/${loadId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -307,7 +305,7 @@ export const loadAPI = {
     // Try both endpoints - first the driver-specific endpoint, then fall back to the loads endpoint
     try {
       console.log('Trying driver endpoint for available loads');
-      const response = await fetch('https://truckconnect-backend.onrender.com/api/driver/loads', {
+      const response = await fetch(`${API_BASE_URL}/driver/loads`, {
         headers: {
           'x-auth-token': token
         }
@@ -325,7 +323,7 @@ export const loadAPI = {
     } catch (driverEndpointError) {
       console.log('Falling back to loads endpoint');
       // Fall back to the loads/available endpoint
-      const response = await fetch('https://truckconnect-backend.onrender.com/api/loads/available', {
+      const response = await fetch(`${API_BASE_URL}/loads/available`, {
         headers: {
           'x-auth-token': token
         }
@@ -347,7 +345,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}/apply`, {
+    const response = await fetch(`${API_BASE_URL}/loads/${loadId}/apply`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -368,7 +366,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}/assign/${driverId}`, {
+    const response = await fetch(`${API_BASE_URL}/loads/${loadId}/assign/${driverId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -389,7 +387,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch('https://truckconnect-backend.onrender.com/api/loads/assigned', {
+    const response = await fetch(`${API_BASE_URL}/loads/assigned`, {
       headers: {
         'x-auth-token': token
       }
@@ -410,7 +408,7 @@ export const loadAPI = {
 
     try {
       console.log(`Fetching applicants for load ${loadId}`);
-      const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}/applicants`, {
+      const response = await fetch(`${API_BASE_URL}/loads/${loadId}/applicants`, {
         headers: {
           'x-auth-token': token
         }
@@ -455,7 +453,7 @@ export const loadAPI = {
           try {
             // Try to fetch driver details including documents
             console.log(`Fetching documents for driver ${applicant.driverId}`);
-            const driverResponse = await fetch(`https://truckconnect-backend.onrender.com/api/drivers/${applicant.driverId}`, {
+            const driverResponse = await fetch(`${API_BASE_URL}/drivers/${applicant.driverId}`, {
               headers: {
                 'x-auth-token': token
               }
@@ -495,7 +493,7 @@ export const loadAPI = {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}/assign/${driverId}`, {
+    const response = await fetch(`${API_BASE_URL}/loads/${loadId}/assign/${driverId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -520,7 +518,7 @@ export const loadAPI = {
       console.log(`Attempting to cancel load ${loadId}`);
       
       // Now the backend supports 'cancelled' status
-      const response = await fetch(`https://truckconnect-backend.onrender.com/api/loads/${loadId}`, {
+      const response = await fetch(`${API_BASE_URL}/loads/${loadId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -557,3 +555,75 @@ export const loadAPI = {
 };
 
 export default api; 
+
+
+// Notification API calls
+export const notificationAPI = {
+  getAll: async () => {
+    const response = await api.get('/notifications');
+    return response.data;
+  },
+  getUnreadCount: async () => {
+    const response = await api.get('/notifications/unread-count');
+    return response.data;
+  },
+  markAsRead: async (id: string) => {
+    const response = await api.put(`/notifications/${id}/read`);
+    return response.data;
+  },
+  markAllAsRead: async () => {
+    const response = await api.put('/notifications/read-all');
+    return response.data;
+  },
+  delete: async (id: string) => {
+    const response = await api.delete(`/notifications/${id}`);
+    return response.data;
+  },
+  deleteAll: async () => {
+    const response = await api.delete('/notifications');
+    return response.data;
+  }
+};
+
+// Profile API calls
+export const profileAPI = {
+  getProfile: async () => {
+    const response = await api.get('/profile/me');
+    return response.data;
+  },
+  updateProfile: async (data: any, role: string) => {
+    const endpoint = role === 'driver' ? '/profile/driver' : '/profile/user';
+    const response = await api.put(endpoint, data);
+    return response.data;
+  },
+  uploadProfilePicture: async (formData: FormData) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const response = await axios.post(
+      `${API_BASE_URL}/profile/upload-picture`,
+      formData,
+      {
+        headers: {
+          'x-auth-token': token
+          // Don't set Content-Type - let browser set it with boundary for multipart/form-data
+        }
+      }
+    );
+    return response.data;
+  },
+  getMyRatings: async () => {
+    const response = await api.get('/profile/my-ratings');
+    return response.data;
+  },
+  getRatingBreakdown: async () => {
+    const response = await api.get('/profile/rating-breakdown');
+    return response.data;
+  }
+};
+
+
+
+
+
+
