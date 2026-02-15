@@ -154,15 +154,26 @@ const sendEmail = async (to, template) => {
   // Send email in background (non-blocking)
   setImmediate(async () => {
     try {
+      // TEMPORARY: For Resend free tier without domain verification,
+      // send all emails to the verified email for testing
+      const testMode = !process.env.RESEND_DOMAIN_VERIFIED;
+      const recipientEmail = testMode ? 'truckconnect.team@gmail.com' : to;
+      
+      if (testMode && to !== 'truckconnect.team@gmail.com') {
+        console.log(`📧 TEST MODE: Email for ${to} redirected to truckconnect.team@gmail.com`);
+        console.log(`� Subject: ${template.subject}`);
+      }
+      
       const { data, error } = await resend.emails.send({
         from: 'TruckConnect <onboarding@resend.dev>',
-        to: [to],
-        subject: template.subject,
+        to: [recipientEmail],
+        subject: testMode && to !== recipientEmail ? `[TEST for ${to}] ${template.subject}` : template.subject,
         html: template.html,
       });
 
       if (error) {
         console.error('❌ Error sending email:', error);
+        console.log('💡 To send to all users, verify your domain at: https://resend.com/domains');
       } else {
         console.log('✅ Email sent successfully:', data.id);
       }
