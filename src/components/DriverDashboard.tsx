@@ -388,15 +388,15 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-amber-50">
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 bg-amber-50 min-h-screen">
       {/* Add a global notification banner when driver has an assigned load */}
       {hasAssignedLoad && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow">
-          <div className="flex items-center">
-            <Truck className="h-6 w-6 mr-2" />
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 sm:p-4 mb-4 sm:mb-6 rounded shadow text-sm sm:text-base">
+          <div className="flex items-start sm:items-center">
+            <Truck className="h-5 w-5 sm:h-6 sm:w-6 mr-2 flex-shrink-0 mt-0.5 sm:mt-0" />
             <div>
               <p className="font-bold">You have an assigned load in progress</p>
-              <p>You cannot apply for new loads until your current assignment is completed by the customer.</p>
+              <p className="text-xs sm:text-sm">You cannot apply for new loads until your current assignment is completed by the customer.</p>
             </div>
           </div>
         </div>
@@ -404,68 +404,68 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
 
       
 
-      <div className="mb-8">
-        <div className="flex space-x-4">
+      <div className="mb-4 sm:mb-8">
+        <div className="flex space-x-2 sm:space-x-4 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setActiveTab('available')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'available'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-100'
             }`}
           >
-            <Truck className="h-5 w-5 mr-2" />
+            <Truck className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('driver.availableLoads')}
           </button>
           <button
             onClick={() => setActiveTab('applied')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'applied'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-100'
             }`}
           >
-            <ClipboardList className="h-5 w-5 mr-2" />
+            <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('driver.appliedLoads')}
           </button>
           <button
             onClick={() => setActiveTab('completed')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'completed'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-100'
             }`}
           >
-            <CheckSquare className="h-5 w-5 mr-2" />
+            <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('driver.completedLoads')}
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'analytics'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-100'
             }`}
           >
-            <BarChart3 className="h-5 w-5 mr-2" />
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('driver.analytics')}
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'profile'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-100'
             }`}
           >
-            <UserIcon className="h-5 w-5 mr-2" />
+            <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('profile.title')}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
           {error}
         </div>
       )}
@@ -478,15 +478,15 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
 
       {!isLoading && activeTab === 'available' && (
         <>
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-amber-200">
-            <h2 className="text-2xl font-bold mb-6 text-amber-800">{t('driver.availableLoads')}</h2>
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-8 border border-amber-200">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-amber-800">{t('driver.availableLoads')}</h2>
+            <form onSubmit={handleSearch} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-amber-800">{t('customer.source')}</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                     value={searchCriteria.source}
                     onChange={(e) => setSearchCriteria({ ...searchCriteria, source: e.target.value })}
                     placeholder="Enter source location"
@@ -496,7 +496,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                   <label className="block text-sm font-medium text-amber-800">{t('customer.destination')}</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                     value={searchCriteria.destination}
                     onChange={(e) => setSearchCriteria({ ...searchCriteria, destination: e.target.value })}
                     placeholder="Enter destination location"

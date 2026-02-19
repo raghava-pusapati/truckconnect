@@ -174,24 +174,24 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ currentUser, user
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6">
       {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-start gap-6">
-          <div className="relative flex-shrink-0">
-            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-gray-300">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+          <div className="relative flex-shrink-0 mx-auto sm:mx-0">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-gray-300">
               {uploadingPicture ? (
                 <div className="flex flex-col items-center justify-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-blue-500"></div>
                   <span className="text-xs mt-2">Uploading...</span>
                 </div>
               ) : profile?.profilePicture ? (
                 <img src={profile.profilePicture} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-4xl text-gray-400">👤</span>
+                <span className="text-3xl sm:text-4xl text-gray-400">👤</span>
               )}
             </div>
-            <label className={`absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-3 cursor-pointer hover:bg-blue-600 transition-colors shadow-lg ${uploadingPicture ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 sm:p-3 cursor-pointer hover:bg-blue-600 transition-colors shadow-lg ${uploadingPicture ? 'opacity-50 cursor-not-allowed' : ''}`}>
               <input
                 type="file"
                 accept="image/jpeg,image/jpg,image/png"
@@ -199,17 +199,17 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ currentUser, user
                 className="hidden"
                 disabled={uploadingPicture}
               />
-              <span className="text-xl">{uploadingPicture ? '⏳' : '📷'}</span>
+              <span className="text-lg sm:text-xl">{uploadingPicture ? '⏳' : '📷'}</span>
             </label>
           </div>
-          <div className="flex-1 min-w-0 pt-2">
-            <h2 className="text-2xl font-bold truncate">{profile?.name}</h2>
-            <p className="text-gray-600 truncate">{profile?.email}</p>
+          <div className="flex-1 min-w-0 pt-0 sm:pt-2 text-center sm:text-left w-full">
+            <h2 className="text-xl sm:text-2xl font-bold truncate">{profile?.name}</h2>
+            <p className="text-sm sm:text-base text-gray-600 truncate">{profile?.email}</p>
             {profile?.averageRating !== undefined && (
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
                 <span className="text-yellow-500">⭐</span>
                 <span className="font-semibold">{profile.averageRating.toFixed(1)}</span>
-                <span className="text-gray-500">({profile.totalRatings} {t('rating.totalRatings')})</span>
+                <span className="text-gray-500 text-sm">({profile.totalRatings} {t('rating.totalRatings')})</span>
               </div>
             )}
             {!uploadingPicture && (
@@ -218,7 +218,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ currentUser, user
           </div>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0"
+            className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0 text-sm sm:text-base w-full sm:w-auto"
           >
             {isEditing ? t('common.cancel') : t('profile.editProfile')}
           </button>
@@ -227,16 +227,16 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ currentUser, user
 
       {/* Edit Form */}
       {isEditing && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4">{t('profile.editProfile')}</h3>
-          <div className="space-y-4">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-bold mb-4">{t('profile.editProfile')}</h3>
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">{t('auth.name')}</label>
               <input
                 type="text"
                 value={editData.name}
                 onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 border rounded text-sm sm:text-base"
               />
             </div>
             <div>
@@ -245,7 +245,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ currentUser, user
                 type="text"
                 value={editData.phone}
                 onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 border rounded text-sm sm:text-base"
               />
             </div>
             {userRole === 'driver' && (

@@ -168,24 +168,24 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <button
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
+            className="flex items-center text-gray-600 hover:text-gray-900 text-sm sm:text-base"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             {t('common.back')}
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8">
+          <div className="text-center mb-4 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {step === 'request' ? t('forgotPassword.title') : step === 'verify' ? t('forgotPassword.verifyOTP') : t('forgotPassword.resetPassword')}
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-xs sm:text-sm text-gray-600">
               {step === 'request' 
                 ? t('forgotPassword.sendOTPDesc')
                 : step === 'verify'
@@ -195,12 +195,12 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
               {error}
               {error.includes('Email not found') && (
                 <button
                   onClick={onBack}
-                  className="block mt-2 text-sm underline hover:text-red-800"
+                  className="block mt-2 text-xs sm:text-sm underline hover:text-red-800"
                 >
                   Go back to login
                 </button>
@@ -209,22 +209,22 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            <div className="mb-4 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
               {success}
             </div>
           )}
 
           {step === 'request' ? (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   {t('auth.email')}
                 </label>
                 <input
                   type="email"
                   required
                   disabled
-                  className="block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm px-4 py-3 text-gray-700"
+                  className="block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm px-3 sm:px-4 py-2 sm:py-3 text-gray-700 text-sm sm:text-base"
                   value={email}
                   readOnly
                 />
@@ -237,11 +237,11 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
                 type="button"
                 onClick={handleSendOTP}
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
                     {t('common.loading')}
                   </div>
                 ) : (
@@ -250,14 +250,14 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
               </button>
             </div>
           ) : step === 'verify' ? (
-            <form onSubmit={handleVerifyOTP} className="space-y-6">
+            <form onSubmit={handleVerifyOTP} className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t('forgotPassword.verifyOTP')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700">{t('forgotPassword.verifyOTP')}</label>
                 <input
                   type="text"
                   required
                   maxLength={6}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-4 py-3 text-center text-2xl tracking-widest font-mono"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 sm:px-4 py-2 sm:py-3 text-center text-xl sm:text-2xl tracking-widest font-mono"
                   value={token}
                   onChange={(e) => setToken(e.target.value.replace(/\D/g, ''))}
                   placeholder={t('forgotPassword.otpPlaceholder')}
@@ -269,11 +269,11 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
                     {t('common.loading')}
                   </div>
                 ) : (
@@ -285,19 +285,19 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
                 type="button"
                 onClick={handleSendOTP}
                 disabled={isLoading}
-                className="w-full text-sm text-orange-600 hover:text-orange-700 underline"
+                className="w-full text-xs sm:text-sm text-orange-600 hover:text-orange-700 underline"
               >
                 {t('forgotPassword.resendOTP')}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleResetPassword} className="space-y-6">
+            <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t('auth.newPassword')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700">{t('auth.newPassword')}</label>
                 <input
                   type="password"
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-4 py-3"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={t('forgotPassword.newPasswordPlaceholder')}
@@ -306,11 +306,11 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t('auth.confirmPassword')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700">{t('auth.confirmPassword')}</label>
                 <input
                   type="password"
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-4 py-3"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={t('forgotPassword.confirmPasswordPlaceholder')}
@@ -320,7 +320,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ userType: propUserType,
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
               >
                 {isLoading ? t('common.loading') : t('forgotPassword.resetPasswordButton')}
               </button>

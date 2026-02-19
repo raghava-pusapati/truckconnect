@@ -89,28 +89,28 @@ function App() {
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
       <ToastProvider />
       <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-amber-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             <div 
-              className="flex items-center cursor-pointer" 
+              className="flex items-center cursor-pointer flex-shrink-0" 
               onClick={() => {
                 if (!currentUser) {
                   window.location.href = '/';
                 }
               }}
             >
-              <Truck className="h-8 w-8 text-amber-950" />
-              <span className="ml-2 text-2xl font-extrabold tracking-tight text-amber-950">Truck Connect</span>
+              <Truck className="h-6 w-6 sm:h-8 sm:w-8 text-amber-950" />
+              <span className="ml-1 sm:ml-2 text-lg sm:text-2xl font-extrabold tracking-tight text-amber-950 truncate">Truck Connect</span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4">
               <LanguageSelector />
               {currentUser && (
                 <>
                   <NotificationBell />
-                  <span className="text-amber-900">Welcome, {currentUser.name}</span>
+                  <span className="hidden md:inline text-amber-900 truncate max-w-[120px]">Welcome, {currentUser.name}</span>
                   <button
                     onClick={handleLogout}
-                    className="bg-amber-950 text-white px-4 py-2 rounded-xl shadow hover:bg-orange-700 transition-colors"
+                    className="bg-amber-950 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base shadow hover:bg-orange-700 transition-colors"
                   >
                     Logout
                   </button>

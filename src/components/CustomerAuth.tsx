@@ -141,38 +141,38 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-100 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <button
             onClick={onBack}
-            className="inline-flex items-center text-amber-800 hover:text-amber-900 transition-colors"
+            className="inline-flex items-center text-amber-800 hover:text-amber-900 transition-colors text-sm sm:text-base"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             {t('common.back')}
           </button>
         </div>
-        <div className="bg-white/80 backdrop-blur rounded-2xl shadow-2xl border border-amber-100 p-8">
+        <div className="bg-white/80 backdrop-blur rounded-2xl shadow-2xl border border-amber-100 p-4 sm:p-6 md:p-8">
           <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-amber-950 mb-8 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-950 mb-4 sm:mb-8 tracking-tight">
               {isLogin ? t('auth.customerLogin') : t('auth.customerRegister')}
             </h2>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
+            <div className="mb-4 p-3 sm:p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-amber-900">{t('auth.name')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-amber-900">{t('auth.name')}</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm sm:text-base shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
@@ -180,11 +180,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-amber-900">{t('auth.email')}</label>
+              <label className="block text-xs sm:text-sm font-medium text-amber-900">{t('auth.email')}</label>
               <input
                 type="email"
                 required
-                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
+                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm sm:text-base shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -192,11 +192,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-amber-900">{t('auth.phone')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-amber-900">{t('auth.phone')}</label>
                 <input
                   type="tel"
                   required
-                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm sm:text-base shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                 />
@@ -204,11 +204,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-amber-900">{t('auth.password')}</label>
+              <label className="block text-xs sm:text-sm font-medium text-amber-900">{t('auth.password')}</label>
               <input
                 type="password"
                 required
-                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
+                className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm sm:text-base shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
@@ -236,11 +236,11 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600/90 hover:to-amber-600/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-60"
+                className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600/90 hover:to-amber-600/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-60"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white/30 border-t-white mr-2"></div>
                     {isLogin ? t('common.loading') : t('common.loading')}
                   </div>
                 ) : (
@@ -250,7 +250,7 @@ const CustomerAuth: React.FC<CustomerAuthProps> = ({ onSuccess, onBack }) => {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-4 sm:mt-6 text-center">
             <button
               onClick={() => {
                 setIsLogin(!isLogin);

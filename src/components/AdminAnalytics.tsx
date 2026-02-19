@@ -123,7 +123,7 @@ const AdminAnalytics: React.FC = () => {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -166,9 +166,9 @@ const AdminAnalytics: React.FC = () => {
       </div>
 
       {/* Driver Status */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.driverApplications')}</h3>
-        <div className="grid grid-cols-3 gap-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.driverApplications')}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
             <p className="text-3xl font-bold text-yellow-600">{data.driversByStatus.pending}</p>
             <p className="text-sm text-gray-600 mt-1">{t('customer.pending')}</p>
@@ -185,10 +185,10 @@ const AdminAnalytics: React.FC = () => {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Load Status Pie Chart */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.loadsDistribution')}</h3>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.loadsDistribution')}</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -211,14 +211,14 @@ const AdminAnalytics: React.FC = () => {
         </div>
 
         {/* Monthly Loads */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">{t('analytics.monthlyLoads')}</h3>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">{t('analytics.monthlyLoads')}</h3>
             {availableYears.length > 0 && (
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
               >
                 {availableYears.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -239,8 +239,8 @@ const AdminAnalytics: React.FC = () => {
       </div>
 
       {/* Revenue Chart */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.revenueTrends')}</h3>
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.revenueTrends')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={revenueChartData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -254,9 +254,9 @@ const AdminAnalytics: React.FC = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.platformSummary')}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('analytics.platformSummary')}</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="text-center p-4 bg-gray-50 rounded-lg">
             <p className="text-2xl font-bold text-gray-900">₹{data.totalRevenue.toLocaleString()}</p>
             <p className="text-sm text-gray-600 mt-1">{t('analytics.totalTransactionValue')}</p>

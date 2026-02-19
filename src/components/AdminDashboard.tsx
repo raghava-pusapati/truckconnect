@@ -224,7 +224,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
     };
 
     return (
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {renderDocument(documentUrls.license, "Driver's License")}
         {renderDocument(documentUrls.rc, "RC Book")}
         {renderDocument(documentUrls.fitness, "Fitness Certificate")}
@@ -236,60 +236,60 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-amber-50">
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 bg-amber-50 min-h-screen">
       
 
-      <div className="mb-8">
-        <div className="flex space-x-4">
+      <div className="mb-4 sm:mb-8">
+        <div className="flex space-x-2 sm:space-x-4 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'pending'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-50'
             }`}
           >
-            <UserCheck className="h-5 w-5 mr-2" />
+            <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('admin.pendingDrivers')}
           </button>
           <button
             onClick={() => setActiveTab('accepted')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'accepted'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-50'
             }`}
           >
-            <CheckCircle className="h-5 w-5 mr-2" />
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('admin.acceptedDrivers')}
           </button>
           <button
             onClick={() => setActiveTab('rejected')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'rejected'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-50'
             }`}
           >
-            <XCircle className="h-5 w-5 mr-2" />
+            <XCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('admin.rejectedDrivers')}
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center px-4 py-2 rounded-md ${
+            className={`flex items-center px-3 sm:px-4 py-2 rounded-md whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
               activeTab === 'analytics'
                 ? 'bg-amber-700 text-white'
                 : 'bg-white text-amber-800 hover:bg-amber-50'
             }`}
           >
-            <BarChart3 className="h-5 w-5 mr-2" />
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
             {t('admin.analytics')}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6 border border-red-200">
+        <div className="bg-red-50 text-red-800 p-3 sm:p-4 rounded-md mb-4 sm:mb-6 border border-red-200 text-sm sm:text-base">
           {error}
         </div>
       )}
@@ -299,25 +299,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ currentUser, onLogout, 
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-700"></div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {activeTab === 'pending' && (
             <>
               {getPendingDrivers().length === 0 ? (
-                <div className="bg-white rounded-lg shadow-lg p-6 border border-amber-200 text-center">
+                <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 border border-amber-200 text-center">
                   <p className="text-amber-800">{t('messages.noDriversFound')}</p>
                 </div>
               ) : (
                 getPendingDrivers().map(driver => (
-                  <div key={driver.id} className="bg-white rounded-lg shadow-lg p-6 border border-amber-200">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2 text-amber-900">{driver.name}</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm text-amber-800">
-                          <p>Email: {driver.email}</p>
+                  <div key={driver.id} className="bg-white rounded-lg shadow-lg p-4 sm:p-6 border border-amber-200">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-amber-900">{driver.name}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm text-amber-800">
+                          <p className="break-words">Email: {driver.email}</p>
                           <p>Mobile: {driver.mobile}</p>
                           <p>Lorry Type: {driver.lorryType}</p>
                           <p>Max Capacity: {driver.maxCapacity} tons</p>
-                          <p>Address: {driver.address}</p>
+                          <p className="sm:col-span-2 break-words">Address: {driver.address}</p>
                         </div>
                       </div>
                       <div className="flex space-x-4">

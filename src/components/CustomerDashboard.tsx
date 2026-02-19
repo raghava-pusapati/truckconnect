@@ -837,74 +837,74 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
   }
 
     return (
-      <div className="min-h-screen bg-amber-50 p-6">
+      <div className="min-h-screen bg-amber-50 p-2 sm:p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-amber-800">{t('customer.dashboard')}</h1>
+          <div className="flex justify-between items-center mb-4 sm:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-800">{t('customer.dashboard')}</h1>
             
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
               {error}
             </div>
           )}
 
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-6">
+          {/* Tabs - Scrollable on mobile */}
+          <div className="flex space-x-2 sm:space-x-4 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
             <button
               onClick={() => setActiveTab('post')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
                 activeTab === 'post'
                   ? 'bg-amber-600 text-white'
                   : 'bg-white text-amber-800'
               }`}
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               {t('customer.postLoad')}
             </button>
             <button
               onClick={() => setActiveTab('view')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
                 activeTab === 'view'
                   ? 'bg-amber-600 text-white'
                   : 'bg-white text-amber-800'
               }`}
             >
-              <ClipboardList className="w-5 h-5 mr-2" />
+              <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               {t('customer.myLoads')}
             </button>
             <button
               onClick={() => setActiveTab('completed')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
                 activeTab === 'completed'
                   ? 'bg-amber-600 text-white'
                   : 'bg-white text-amber-800'
               }`}
             >
-              <ClipboardCheck className="w-5 h-5 mr-2" />
+              <ClipboardCheck className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               {t('customer.completedLoads')}
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
                 activeTab === 'analytics'
                   ? 'bg-amber-600 text-white'
                   : 'bg-white text-amber-800'
               }`}
             >
-              <BarChart3 className="w-5 h-5 mr-2" />
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               {t('customer.analytics')}
             </button>
             <button
               onClick={() => setActiveTab('profile')}
-              className={`flex items-center px-4 py-2 rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap text-sm sm:text-base flex-shrink-0 ${
                 activeTab === 'profile'
                   ? 'bg-amber-600 text-white'
                   : 'bg-white text-amber-800'
               }`}
             >
-              <UserIcon className="w-5 h-5 mr-2" />
+              <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               {t('profile.title')}
             </button>
           </div>
@@ -917,25 +917,25 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
 
           {/* Post a Load Form */}
           {!isLoading && activeTab === 'post' && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold text-amber-800 mb-4">{t('customer.postLoad')}</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+              <h2 className="text-lg sm:text-xl font-semibold text-amber-800 mb-4">{t('customer.postLoad')}</h2>
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('customer.source')} <span className='text-green-500'>(Start Point -Along with Exact Address)</span></label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.source')} <span className='text-green-500 text-xs sm:text-sm'>(Start Point -Along with Exact Address)</span></label>
                   <input
                     type="text"
                     name="source"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('customer.destination')} <span className='text-green-500'>(End Point -Along with Exact Address)</span></label>
+                  <label className="block text-sm font-medium text-gray-700">{t('customer.destination')} <span className='text-green-500 text-xs sm:text-sm'>(End Point -Along with Exact Address)</span></label>
                   <input
                     type="text"
                     name="destination"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
@@ -944,7 +944,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     type="text"
                     name="loadType"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
@@ -954,7 +954,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     name="quantity"
                     required
                     min="1"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
@@ -964,7 +964,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     name="estimatedFare"
                     required
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
@@ -973,7 +973,7 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     name="description"
                     rows={3}
                     placeholder={t('customer.descriptionPlaceholder')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm sm:text-base px-3 py-2"
                   />
                 </div>
                 <div>
@@ -984,13 +984,13 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                     minDate={new Date()}
                     dateFormat="dd/MM/yyyy"
                     placeholderText={t('customer.selectDeliveryDate')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 px-3 py-2 border text-sm sm:text-base"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
+                  className="w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
                 >
                   {isLoading ? t('common.loading') : t('customer.postLoad')}
                 </button>
@@ -1000,9 +1000,9 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
 
           {/* View My Loads */}
           {!isLoading && activeTab === 'view' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {getPendingLoads().map((load) => (
-                <div key={load.id} className={`bg-white p-6 rounded-lg shadow-md relative ${
+                <div key={load.id} className={`bg-white p-4 sm:p-6 rounded-lg shadow-md relative ${
                   load.status === 'assigned' ? 'border-l-4 border-green-500' : ''
                 }`}>
                   {/* Only show edit and delete buttons for pending loads, not for assigned loads */}
@@ -1013,14 +1013,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                         className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50"
                         title={t('customer.editLoad')}
                       >
-                        <Edit className="w-5 h-5" />
+                        <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteLoad(load.id)}
                         className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
                         title="Cancel Load"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   )}
@@ -1184,13 +1184,13 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
 
           {/* Completed Loads */}
           {!isLoading && activeTab === 'completed' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {getCompletedLoads().map((load) => (
-                <div key={load.id} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-xl font-semibold text-amber-800 mb-4">
+                <div key={load.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                  <h3 className="text-lg sm:text-xl font-semibold text-amber-800 mb-3 sm:mb-4">
                     {load.source} - {load.destination}
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-sm sm:text-base">
                     <p><span className="font-medium">{t('customer.loadType')}:</span> {load.loadType}</p>
                     <p><span className="font-medium">{t('customer.quantity')}:</span> {load.quantity}</p>
                     <p><span className="font-medium">{t('customer.estimatedFare')}:</span> ₹{load.estimatedFare}</p>

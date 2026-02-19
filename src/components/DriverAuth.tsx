@@ -331,27 +331,59 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
     </div>
   );
 
+  const renderDocumentUploadField = (
+    documentType: keyof typeof documents,
+    label: string,
+    required: boolean = true
+  ) => (
+    <div>
+      <label className="block text-xs sm:text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="mt-1 flex items-center">
+        <label className="flex w-full cursor-pointer border rounded-md border-gray-300 py-2 px-3 hover:bg-gray-50">
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*, application/pdf"
+            onChange={handleDocumentChange(documentType)}
+            required={required}
+          />
+          <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mr-2 flex-shrink-0" />
+          <span className="text-xs sm:text-sm text-gray-600 flex-1 truncate">
+            {documents[documentType] ? documents[documentType]!.name : 'Choose file...'}
+          </span>
+        </label>
+      </div>
+      {documents[documentType] && (
+        <p className="mt-1 text-xs text-green-600 truncate">
+          File selected: {documents[documentType]!.name}
+        </p>
+      )}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <button
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
+            className="flex items-center text-gray-600 hover:text-gray-900 text-sm sm:text-base"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             {t('common.back')}
           </button>
         </div>
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">
               {isLogin ? t('auth.driverLogin') : t('auth.driverRegister')}
             </h2>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
               {error}
             </div>
           )}
@@ -376,40 +408,40 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {!isLogin && (
               <>
                 {/* Personal Information Section */}
                 <div className="border-b border-gray-200 pb-4 mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Personal Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3">Personal Information</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Name</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700">Name</label>
                       <input
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Mobile Number</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700">Mobile Number</label>
                       <input
                         type="tel"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                         value={formData.mobile}
                         onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                       />
                     </div>
 
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700">Address</label>
                       <textarea
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       />
@@ -419,25 +451,25 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
 
                 {/* Vehicle Information Section */}
                 <div className="border-b border-gray-200 pb-4 mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Vehicle Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3">Vehicle Information</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">LORRY DETAILS(Company & No.of tyres)</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700">LORRY DETAILS(Company & No.of tyres)</label>
                       <input
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                         value={formData.lorryType}
                         onChange={(e) => setFormData({ ...formData, lorryType: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Maximum Capacity (tons)</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700">Maximum Capacity (tons)</label>
                       <input
                         type="number"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                         value={formData.maxCapacity}
                         onChange={(e) => setFormData({ ...formData, maxCapacity: e.target.value })}
                       />
@@ -447,22 +479,22 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
                 
                 {/* Documents Section */}
                 <div className="border-b border-gray-200 pb-4 mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Required Documents</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3">Required Documents</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Please upload the following documents. Required fields are marked with an asterisk (*).
                   </p>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                     {renderDocumentUploadField('license', 'Driver License')}
                     {renderDocumentUploadField('rc', 'RC Book')}
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                     {renderDocumentUploadField('fitness', 'Fitness Certificate')}
                     {renderDocumentUploadField('insurance', 'Insurance Certificate')}
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {renderDocumentUploadField('medical', 'Medical Certificate')}
                     {renderDocumentUploadField('allIndiaPermit', 'All India Permit', false)}
                   </div>
@@ -472,25 +504,25 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
 
             {/* Account Information Section - Both Login and Register */}
             <div className={!isLogin ? "border-b border-gray-200 pb-4 mb-4" : ""}>
-              <h3 className={!isLogin ? "text-lg font-medium text-gray-900 mb-3" : "sr-only"}>Account Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className={isLogin ? "" : "col-span-1"}>
-                  <label className="block text-sm font-medium text-gray-700">{t('auth.email')}</label>
+              <h3 className={!isLogin ? "text-base sm:text-lg font-medium text-gray-900 mb-3" : "sr-only"}>Account Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className={isLogin ? "" : "sm:col-span-1"}>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">{t('auth.email')}</label>
                   <input
                     type="email"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
-                <div className={isLogin ? "" : "col-span-1"}>
-                  <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
+                <div className={isLogin ? "" : "sm:col-span-1"}>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">{t('auth.password')}</label>
                   <input
                     type="password"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm sm:text-base px-3 py-2"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
