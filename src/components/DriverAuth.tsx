@@ -305,38 +305,6 @@ const DriverAuth: React.FC<DriverAuthProps> = ({ onSuccess, onBack }) => {
     required: boolean = true
   ) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <div className="mt-1 flex items-center">
-        <label className="flex w-full cursor-pointer border rounded-md border-gray-300 py-2 px-3 hover:bg-gray-50">
-          <input
-            type="file"
-            className="hidden"
-            accept="image/*, application/pdf"
-            onChange={handleDocumentChange(documentType)}
-            required={required}
-          />
-          <Upload className="h-5 w-5 text-gray-400 mr-2" />
-          <span className="text-gray-600 flex-1 truncate">
-            {documents[documentType] ? documents[documentType]!.name : 'Choose file...'}
-          </span>
-        </label>
-      </div>
-      {documents[documentType] && (
-        <p className="mt-1 text-xs text-green-600">
-          File selected: {documents[documentType]!.name}
-        </p>
-      )}
-    </div>
-  );
-
-  const renderDocumentUploadField = (
-    documentType: keyof typeof documents,
-    label: string,
-    required: boolean = true
-  ) => (
-    <div>
       <label className="block text-xs sm:text-sm font-medium text-gray-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
