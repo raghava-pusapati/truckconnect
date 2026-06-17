@@ -97,6 +97,12 @@ router.put('/:id', authMiddleware, async (req, res) => {
     // Set completedAt only for completed loads
     if (status === 'completed') {
       load.completedAt = new Date();
+      
+      // 🚨 CRITICAL: Auto-stop tracking when load is completed
+      if (load.tracking?.isActive) {
+        load.tracking.isActive = false;
+        console.log(`Auto-stopped tracking for completed load ${load._id}`);
+      }
     }
     
     const updatedLoad = await load.save();

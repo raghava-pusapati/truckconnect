@@ -5,6 +5,7 @@ import { loadAPI } from '../api';
 import DriverAnalytics from './DriverAnalytics';
 import RatingModal from './RatingModal';
 import ProfileManagement from './ProfileManagement';
+import DriverTrackingControl from './DriverTrackingControl';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config';
@@ -605,6 +606,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ currentUser, onLogout
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    {/* Driver Tracking Control */}
+                    <div className="mt-4">
+                      <DriverTrackingControl loadId={load.id} />
                     </div>
                   </div>
                   <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md font-semibold border border-green-300">

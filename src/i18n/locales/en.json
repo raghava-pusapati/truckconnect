@@ -119,7 +119,8 @@
     "exportLoads": "Export Loads",
     "driverDetails": "Driver Details",
     "completedAt": "Completed At",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "trackLoad": "Track Load"
   },
   "driver": {
     "dashboard": "Driver Dashboard",

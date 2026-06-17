@@ -119,7 +119,8 @@
     "exportLoads": "लोड निर्यात करें",
     "driverDetails": "ड्राइवर विवरण",
     "completedAt": "पूर्ण हुआ",
-    "createdAt": "बनाया गया"
+    "createdAt": "बनाया गया",
+    "trackLoad": "लोड ट्रैक करें"
   },
   "driver": {
     "dashboard": "ड्राइवर डैशबोर्ड",

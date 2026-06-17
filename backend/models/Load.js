@@ -107,6 +107,36 @@ const loadSchema = new mongoose.Schema({
   driverRated: {
     type: Boolean,
     default: false
+  },
+  // Tracking data
+  tracking: {
+    isActive: {
+      type: Boolean,
+      default: false
+    },
+    startedAt: {
+      type: Date,
+      default: null
+    },
+    currentLocation: {
+      latitude: {
+        type: Number,
+        default: null
+      },
+      longitude: {
+        type: Number,
+        default: null
+      },
+      timestamp: {
+        type: Date,
+        default: null
+      }
+    },
+    locationHistory: [{
+      latitude: Number,
+      longitude: Number,
+      timestamp: Date
+    }]
   }
 });
 

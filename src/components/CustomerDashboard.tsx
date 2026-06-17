@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, ClipboardList, ClipboardCheck, UserCheck, ChevronDown, ChevronUp, ExternalLink, Trash2, BarChart3, Star, User as UserIcon, Edit } from 'lucide-react';
+import { Plus, ClipboardList, ClipboardCheck, UserCheck, ChevronDown, ChevronUp, ExternalLink, Trash2, BarChart3, Star, User as UserIcon, Edit, Navigation } from 'lucide-react';
 import { User } from '../types';
 import { loadAPI } from '../api';
 import CustomerAnalytics from './CustomerAnalytics';
 import RatingModal from './RatingModal';
 import ProfileManagement from './ProfileManagement';
+import LiveTracking from './LiveTracking';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
@@ -77,6 +78,10 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
   const [ratingLoadId, setRatingLoadId] = useState<string>('');
   const [ratingDriverId, setRatingDriverId] = useState<string>('');
   const [ratingDriverName, setRatingDriverName] = useState<string>('');
+  
+  // Tracking modal state
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [trackingLoadId, setTrackingLoadId] = useState<string>('');
   
   // Delivery date state
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState<Date | null>(null);
@@ -1166,12 +1171,24 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
                           </button>
                         )}
                         {load.status === 'assigned' && (
-                          <button
-                            onClick={() => handleCompleteLoad(load.id)}
-                            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex justify-center items-center"
-                          >
-                            {t('messages.markAsCompleted')}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => {
+                                setTrackingLoadId(load.id);
+                                setShowTrackingModal(true);
+                              }}
+                              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 flex justify-center items-center"
+                            >
+                              <Navigation className="w-4 h-4 mr-2" />
+                              {t('customer.trackLoad')}
+                            </button>
+                            <button
+                              onClick={() => handleCompleteLoad(load.id)}
+                              className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex justify-center items-center"
+                            >
+                              {t('messages.markAsCompleted')}
+                            </button>
+                          </>
                         )}
                       </div>
                       {load.status === 'pending' && renderApplicants(load)}
@@ -1263,6 +1280,14 @@ const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ currentUser, onLo
           type="driver"
           onSuccess={handleRatingSuccess}
         />
+
+        {/* Live Tracking Modal */}
+        {showTrackingModal && (
+          <LiveTracking
+            loadId={trackingLoadId}
+            onClose={() => setShowTrackingModal(false)}
+          />
+        )}
       </div>
     );
   };
